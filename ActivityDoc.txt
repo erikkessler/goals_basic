@@ -1,0 +1,110 @@
+Activity
+
+* Fields
+- name
+- description
+- repeated
+- show_date
+- expiration_date
+- parent_id
+- state - default incomplete - 0: incomplete, 1: complete, 2: overdue, 3: abondoned, 4: archived habit
+- completed_date
+- user_id
+- integration_info
+- type
+- goal_type
+- role_id
+- reward - default 0
+- penalty - default 0 
+- weight
+- rep_parent_id
+- count_goal
+- count
+- is_root - default true
+
+* Methods
+- add_child(Activity child) - add a sub activity 
+- make_root - break from parent
+- outdent - move up one level
+- is_complete? - is the activity complete, return state
+- complete - set it and all children to complete, should call parent is_complete in case parent depends on children being complete
+- incomplete - set it and set all children as incomplete - should call is_complete on parent
+- remove_act - delete it and children- will handle differently for different activities
+- num_children - number of sub activities
+- total_reward - possible reward of doing all things
+- total_penalty - possible loss of not doing all things
+- total_payout - current value you are at
+- week_payout(date week) - payout of the week
+- private set_parent(Activity a)
+
+* Types
+
+** FullTask
+
+*** Methods
+- is_complete? - if children check if they all complete or just return state
+
+** PartialTask
+
+*** Methods
+- is_complete? - just return state
+
+** Repeatable
+
+*** Methods
+- gen_reps(int start_day, array weeks) - generate activities 
+- set_repeated(array days) - calculate the value for repeated
+- is_repeated_day(int wday) - returns if it should occur on the wday
+- del_reps - delete future reps
+- get_repeated - reutrn array of wdays
+- private set_parent(Activity a) - get rep_parent, delete all future reps, regenerate
+- add_child(Activity child) - needs to add child to each future one and make the child a repeatable 
+- total_payout - sum reward of all compeleted - sum pently all missed
+- week_payout(date week) - sum for this week
+- total_reward - weekly - reward * # reps this week
+- total_penalty - weekly - penalty * # reps this week
+- remove_act - delete it, all children and all reps
+- complete - should only mark complete if it an individual, should increment count of rep_parent
+
+*** Types
+
+**** Habit
+
+***** Method
+- remove_act - set state to 4 and remove_act on all children
+
+
+***** Types
+
+****** HabitNumber
+
+******* Methods
+- total_reward -  reward
+- total_penalty -  penalty
+- week_payout - if completed this week then reward if expired this week then penalty else 0 
+- total_payout - if competed reward if expired penalty
+- is_complete - return state
+- complete - make sure not rep_parent, increment count of rep_parent, if goal_count <= count then mark rep_parent as complete and delete future reps
+****** HabitDate
+
+******* Methods
+- gen_reps - generate all up to expiration date
+- total_reward - count * reward
+- total_penalty - # incomplete up to date * penalty
+- complete - should only work on individual, increment rep_parent
+
+****** HabitWeek
+
+******* Methods
+- gen_reps - gen all up to expiration date
+- total_reward - reward
+- total_penalty - penalty
+- week_payout - if completed this week then reward ir expired this week then penalty else 0
+- total_payout - if completed reward, if expired penalty
+- complete - should only work on individuals, if number completed this week = count then decrement goal_count. if goal_count <= 0 then set as completed and delete future
+
+** Goal
+Instance vars for goal_type
+*** Methods
+- complete - set it and all children to be complete
+- is_complete - if internal then checks if all children are complete, if changes state then call is_complete on parent if external then returns state

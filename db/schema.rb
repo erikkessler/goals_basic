@@ -11,26 +11,31 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140524210943) do
+ActiveRecord::Schema.define(version: 20140527215547) do
 
   create_table "activities", force: true do |t|
     t.integer  "repeated"
-    t.date     "due_date"
+    t.date     "show_date"
     t.datetime "created_at"
     t.datetime "updated_at"
     t.integer  "parent_id"
     t.string   "name"
     t.text     "description"
-    t.boolean  "complete"
     t.datetime "completed_date"
     t.integer  "user_id"
     t.string   "integration_info"
     t.string   "type"
     t.integer  "priority"
     t.integer  "role_id"
-    t.decimal  "value",            precision: 8, scale: 2
-    t.decimal  "weight",           precision: 8, scale: 2
-    t.boolean  "goal"
+    t.integer  "rep_parent_id"
+    t.date     "expiration_date"
+    t.integer  "state",            default: 0,    null: false
+    t.integer  "goal_type"
+    t.integer  "reward",           default: 0,    null: false
+    t.integer  "penalty",          default: 0,    null: false
+    t.integer  "count",            default: 0,    null: false
+    t.integer  "count_goal"
+    t.boolean  "is_root",          default: true, null: false
   end
 
   add_index "activities", ["parent_id"], name: "index_activities_on_parent_id"
