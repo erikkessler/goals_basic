@@ -45,7 +45,6 @@ Activity
 - is_complete? - if children check if they all complete or just return state
 
 ** PartialTask
-
 *** Methods
 - is_complete? - just return state
 
@@ -103,8 +102,52 @@ Activity
 - total_payout - if completed reward, if expired penalty
 - complete - should only work on individuals, if number completed this week = count then decrement goal_count. if goal_count <= 0 then set as completed and delete future
 
+**** GoalTracker
+
+***** Methods
+- gen_reps - do something intelligent based on if there a expiration or not
+- complete - send data to goal
+- is_complete - return if sent data to goal
 ** Goal
 Instance vars for goal_type
 *** Methods
 - complete - set it and all children to be complete
 - is_complete - if internal then checks if all children are complete, if changes state then call is_complete on parent if external then returns state
+
+*** Type
+
+**** ProgressGoal
+- has a traker child 
+
+***** Methods
+- record(int value) - does nothing in this implementation
+- is_complete - does nothing in this implementation
+- complete - does nothing
+- remove_act - set as abondoned
+
+***** Types
+
+****** SumProgress
+- record - add to count
+- is_complete - is count >= count_goal
+
+****** SubProgress
+- need initial amount
+- record - remove from count
+- is_complete - is count <= count_goal
+
+****** AvgUpProgress
+- record - add to count
+- is_complete - calculate average is it >= goal_count and is it the or past expiration date
+
+****** AvgDownProgress
+- record - add to count
+- is_complete - calculate average is it <= goal_count and is it the or past expiration date
+
+****** MaxProgress
+- record - set as count if it greater
+- is_complete - is count >= goal
+
+****** MinProgress
+- record - set as count if it lower 
+- is_complete - is count <= goal
