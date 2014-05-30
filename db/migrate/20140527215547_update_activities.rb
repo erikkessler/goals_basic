@@ -1,7 +1,7 @@
 class UpdateActivities < ActiveRecord::Migration
   def change
     rename_column :activities, :due_date, :show_date
-    add_column :activities, :expiration_date,:date
+    add_column :activities, :expiration_date, :date
     remove_column :activities, :complete
     add_column :activities, :state, :integer, :default => 0, :null => false
     add_column :activities, :goal_type, :integer

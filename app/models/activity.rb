@@ -13,6 +13,7 @@ class Activity < ActiveRecord::Base
   self.inheritance_column = :type
   scope :full_tasks, -> { where(type:'FullTask') }
   scope :partial_tasks, -> { where(type:'PartialTask') }
+  scope :repeatables, -> { where(type:'Repeatable') }
 
   # constants for state 
   INCOMPLETE = 0
@@ -79,7 +80,7 @@ class Activity < ActiveRecord::Base
   def complete
     if self.state != COMPLETE
       self.state = COMPLETE
-      self.completed_date = DateTime.now
+      self.completed_date = DateTime.current
       self.save!
     end
     self.children.each do |child| 
@@ -120,7 +121,7 @@ class Activity < ActiveRecord::Base
   end
 
   # calculates payout for the specified week
-  def week_payout(date = Date.today)
+  def week_payout(date = Date.current)
     if !date.is_a? Date
       puts "Must pass in a date"
       return
@@ -194,7 +195,6 @@ class Activity < ActiveRecord::Base
     
   end
 
-  protected
   # removes association to old parent and adds new one
   def set_parent(new_parent)
     if new_parent.is_a? Activity
@@ -203,7 +203,7 @@ class Activity < ActiveRecord::Base
       self.parent = new_parent
       self.is_root = false
       self.save!
-      parent.is_complete?
+      new_parent.is_complete?
       
       if old_parent != nil
         old_parent.children.delete(self)

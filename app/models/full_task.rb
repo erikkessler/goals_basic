@@ -16,7 +16,7 @@ class FullTask < Activity
 
       if self.state != Activity::COMPLETE
         self.state = Activity::COMPLETE
-        self.completed_date = DateTime.now
+        self.completed_date = DateTime.current
         self.save!
       end
       return true

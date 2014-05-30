@@ -9,7 +9,7 @@ class PartialTask < Activity
   def complete
     if self.state != Activity::COMPLETE
       self.state = Activity::COMPLETE
-      self.completed_date = DateTime.now
+      self.completed_date = DateTime.current
       self.save!
 
       if self.parent != nil
