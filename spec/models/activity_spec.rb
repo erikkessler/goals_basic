@@ -282,8 +282,8 @@ describe Activity do
       @grades.total_payout.should == 0
       @read.complete
       @grades.total_payout.should == 3
-      @grades.state = 2
-      @math.state = 2
+      @grades.state = Activity::EXPIRED
+      @math.state = Activity::EXPIRED
       @grades.total_payout.should == -19
     end
 
@@ -302,7 +302,7 @@ describe Activity do
         @read.complete
         @grades.week_payout.should == 3
         @math.expiration_date = Date.new(2014, 05, 27)
-        @math.state = 2
+        @math.state = Activity::EXPIRED
         @math.save
         @grades.week_payout.should == 1
       end
@@ -311,13 +311,13 @@ describe Activity do
         @grades.complete
         @grades.week_payout.should == 18
         @grades.expiration_date = Date.new(2014, 05, 27)
-        @grades.state = 2
+        @grades.state = Activity::EXPIRED
         @grades.save!
         @math.expiration_date = Date.new(2014, 05, 27)
-        @math.state = 2
+        @math.state = Activity::EXPIRED
         @math.save!
         @read.expiration_date = Date.new(2014, 05, 27)
-        @read.state = 2
+        @read.state = Activity::EXPIRED
         @read.save!
         @grades.week_payout.should == -22
       end

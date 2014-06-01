@@ -1,3 +1,6 @@
+# This type of activity is completly isolated from its children in terms
+# of being complete
+
 class PartialTask < Activity
   
   # returns state of task in isolation
@@ -20,8 +23,13 @@ class PartialTask < Activity
   
   # marks the task and only the task as incomplete
   def incomplete
-    if self.state != Activity::INCOMPLETE
-      self.state = Activity::INCOMPLETE
+    if self.state != Activity::INCOMPLETE and self.state != Activity::EXPIRED
+      if self.expiration_date.nil? or 
+          self.expiration_date >= Date.current
+        self.state = Activity::INCOMPLETE
+      else
+        self.state = Activity::EXPIRED
+      end
       self.completed_date = nil
       self.save!
 

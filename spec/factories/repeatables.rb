@@ -37,6 +37,7 @@ FactoryGirl.define do
 
     factory :daily_repeatable, traits: [:repeat_every_day]
     factory :weekday_repeatable, traits: [:repeat_weekdays]
+    factory :weekend_repeatable, traits:[:repeat_weekends]
     factory :mwf_repeatable, traits: [:repeat_mwf]
 
     factory :habit, class: Habit do
