@@ -60,6 +60,32 @@ class Repeatable < Activity
       end
     end
   end
+
+  # allows you to add rep to a rep_parent. Manually added repitition
+  def add_rep(date = Date.current, period = 1)
+    # must be the rep_parent
+    if !self.rep_parent.nil?
+      self.rep_parent.add_rep(date, period)
+      return
+    end
+
+    # make sure date now or in future
+    if date < Date.current
+      puts "date before today"
+      return
+    end
+
+    new_act = self.dup
+    new_act.show_date = date
+    if period != NO_EXPIRATION
+      new_act.expiration_date = 
+        date.advance(:days => period)
+    end
+    new_act.parent_id = nil
+    new_act.save!
+    self.repititions << new_act
+    
+  end
   
   # returns true if repeated act should show on that day
   def is_repeated_day(day_int)

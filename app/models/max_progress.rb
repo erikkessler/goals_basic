@@ -1,20 +1,27 @@
-# This type of progress goal is complete when count sums up to count_goal
+# This type of progress goal is complete when you reach a specified maximum.
+# </br>Example: Squat 300lbs
 
-class SumProgress < ProgressGoal
+class MaxProgress < ProgressGoal
 
   # record the value to count, check if complete
   def record(value)
-    self.count = self.count + value
-    self.save!
-    self.is_complete?
+    if value > self.count
+      self.count = value 
+      self.save!
+      self.is_complete?
+    end
   end
 
-  # if edit a goal tracker
+  # if a goal tracker gets edited
   def edit(diff, value)
-    self.record(diff)
+    if diff < 0
+      self.reload_max
+    else
+      self.record(value)
+    end
   end
 
-  # is count >= count_goal?
+  # is count <= count_goal?
   def is_complete?
     # if complete check that still valid
     if self.state == Activity::COMPLETE
@@ -44,4 +51,23 @@ class SumProgress < ProgressGoal
       end
     end
   end
+
+  # rechecks the max
+  def reload_max
+    max = nil
+    self.tracker.repititions.each do |rep| 
+      if rep.state == Activity::COMPLETE
+        if max.nil?
+          max = rep.count
+        elsif rep.count > max
+          max = rep.count
+        end
+      end
+    end
+    self.count = max
+    self.save!
+    self.is_complete?
+    
+  end
 end
+

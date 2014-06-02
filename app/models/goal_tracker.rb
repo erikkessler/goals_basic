@@ -4,9 +4,6 @@
 
 class GoalTracker < Repeatable
 
-  # must have a parent
-  validates :parent_id, presence: true
-
   # Records the value of the checkin that is passed in through value.
   # Stores in count and makes state complete
   def complete(value = nil)
@@ -25,15 +22,17 @@ class GoalTracker < Repeatable
 
     if self.state == Activity::COMPLETE
       diff = value - self.count
-      self.parent.record(diff)
       self.completed_date = DateTime.current
+      self.count = value
       self.save!
+      self.parent.edit(diff, value)
       return
     else
-      self.parent.record(value)
       self.completed_date = DateTime.current
-      self.state = Activity::COMPLETED
+      self.state = Activity::COMPLETE
+      self.count = value
       self.save!
+      self.parent.record(value)
     end
   end
 

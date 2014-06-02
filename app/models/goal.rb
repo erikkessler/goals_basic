@@ -66,14 +66,17 @@ class Goal < Activity
   def remove_act
     # outdent children in case remove_act doesn't delete
     self.children.each do |child|
-      child.outdent
-      child.remove_act
+      if child.type != 'GoalTracker'
+        child.outdent
+        child.remove_act
+      end
     end
     
     # check if parent should update completeness
     old_parent = self.parent
 
     self.state = Activity::ABANDONED
+    self.save!
     
     # refresh parent completeness
     if !old_parent.nil?
