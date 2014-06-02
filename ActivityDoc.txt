@@ -85,6 +85,7 @@ Activity
 - total_payout - if competed reward if expired penalty
 - is_complete - return state
 - complete - make sure not rep_parent, increment count of rep_parent, if goal_count <= count then mark rep_parent as complete and delete future reps
+- incomplete
 ****** HabitDate
 
 ******* Methods

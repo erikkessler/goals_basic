@@ -67,7 +67,17 @@
 
     
     
+    <!-- Method Quickref -->
+<div id="method-list-section" class="nav-section">
+  <h3>Methods</h3>
+
+  <ul class="link-list" role="directory">
     
+    <li ><a href="#method-i-remove_act">#remove_act</a>
+    
+  </ul>
+</div>
+
   </div>
 </nav>
 
@@ -78,6 +88,29 @@
 
   <section class="description">
     
+<p>This type of repeatable is nearly idenitcal to the vanilla repeatable
+execpt that when <a href="Habit.html#method-i-remove_act">#remove_act</a>
+is called on a <a href="Habit.html">Habit</a> the type is set to 
+ARCHIVED_HABIT.</p>
+<ul><li>
+<p>The goal is that it is possible end a <a href="Habit.html">Habit</a> while
+maintaining</p>
+</li></ul>
+
+<p>a record of it.</p>
+<ul><li>
+<p>A plain <a href="Habit.html">Habit</a> would be used when you don&#39;t
+have a goal number of times that</p>
+</li></ul>
+
+<p>you want to complete the task</p>
+<ul><li>
+<p>Example: Make bed every day - there is no reason to put an end date on this</p>
+</li></ul>
+
+<p>but there may come a point where it is a habit and thus no reason to keep
+it</p>
+
   </section>
 
   
@@ -93,6 +126,68 @@
     
 
     
+     <section id="public-instance-5Buntitled-5D-method-details" class="method-section">
+       <header>
+         <h3>Public Instance Methods</h3>
+       </header>
+
+    
+      <div id="method-i-remove_act" class="method-detail ">
+        
+        <div class="method-heading">
+          <span class="method-name">remove_act</span><span
+            class="method-args">()</span>
+          
+          <span class="method-click-advice">click to toggle source</span>
+          
+        </div>
+        
+
+        <div class="method-description">
+          
+          <p>Sets state to ARCHIVED_HABIT, deletes all future reps, and calls <a
+href="Habit.html#method-i-remove_act">#remove_act</a> on children</p>
+          
+          
+
+          
+          <div class="method-source-code" id="remove_act-source">
+            <pre><span class="ruby-comment"># File habit.rb, line 15</span>
+<span class="ruby-keyword">def</span> <span class="ruby-identifier">remove_act</span>
+  <span class="ruby-comment"># select rep_parent if it exists</span>
+  <span class="ruby-identifier">node</span> = <span class="ruby-keyword">self</span>
+  <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span><span class="ruby-keyword">self</span>.<span class="ruby-identifier">rep_parent</span>.<span class="ruby-identifier">nil?</span>
+    <span class="ruby-identifier">node</span> = <span class="ruby-keyword">self</span>.<span class="ruby-identifier">rep_parent</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-comment"># outdent children in case remove_act doesn&#39;t delete</span>
+  <span class="ruby-identifier">node</span>.<span class="ruby-identifier">children</span>.<span class="ruby-identifier">each</span> <span class="ruby-keyword">do</span> <span class="ruby-operator">|</span><span class="ruby-identifier">child</span><span class="ruby-operator">|</span>
+    <span class="ruby-identifier">child</span>.<span class="ruby-identifier">outdent</span>
+    <span class="ruby-identifier">child</span>.<span class="ruby-identifier">remove_act</span>
+  <span class="ruby-keyword">end</span>
+
+  <span class="ruby-comment"># hold parent in case it need be updated</span>
+  <span class="ruby-identifier">old_parent</span> = <span class="ruby-identifier">node</span>.<span class="ruby-identifier">parent</span>
+  
+  <span class="ruby-identifier">node</span>.<span class="ruby-identifier">del_reps</span>
+  <span class="ruby-identifier">node</span>.<span class="ruby-identifier">state</span> = <span class="ruby-constant">Activity</span><span class="ruby-operator">::</span><span class="ruby-constant">ARCHIVED_HABIT</span>
+
+  <span class="ruby-keyword">if</span> <span class="ruby-operator">!</span><span class="ruby-identifier">old_parent</span>.<span class="ruby-identifier">nil?</span>
+    <span class="ruby-identifier">old_parent</span>.<span class="ruby-identifier">is_complete?</span>
+  <span class="ruby-keyword">end</span>
+<span class="ruby-keyword">end</span></pre>
+          </div>
+          
+        </div>
+
+        
+
+        
+      </div>
+
+    
+    </section>
+  
   </section>
 </main>
 

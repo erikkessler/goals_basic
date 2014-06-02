@@ -293,23 +293,4 @@ describe Repeatable do
       end
     end
   end
-
-  describe Habit do
-    
-    it "has a valid factory" do
-      create(:habit).should be_valid
-    end
-
-    it "is invalid without a name" do
-      build(:habit, name: nil).should_not be_valid
-    end
-
-    it "is an activity" do
-      rep = create(:habit)
-      rep.is_a?(Activity).should == true
-      rep.is_a?(Repeatable).should == true
-      rep.is_a?(Habit).should == true
-      rep.is_a?(FullTask).should == false
-    end
-  end
 end

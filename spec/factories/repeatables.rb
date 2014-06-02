@@ -44,6 +44,14 @@ FactoryGirl.define do
       name "Basic Habit"
       repeat_weekdays
       low_reward
+
+      factory :habitnumber, class: HabitNumber do
+        name "Habit Number"
+        count_goal 5
+        repeat_every_day
+        high_reward
+        low_penalty
+      end
     end
   end
 end

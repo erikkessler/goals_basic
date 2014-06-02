@@ -1,10 +1,14 @@
 # A subclass of Activity that allows for repeated events.
 # Methods to generate the repeated tasks and manipulate them.
+# Use the extension of this class, Habit, for most cases.
 
 class Repeatable < Activity
 
   # used to calculate repeated days
   DAY_VALUES = {0 => 2, 1 => 3, 2 => 5, 3 => 7, 4 => 11, 5 => 13, 6 => 17}
+  
+  # used to indicate no expiration on repititions
+  NO_EXPIRATION = -1
 
   # inheritance
   self.inheritance_column = :type
@@ -46,7 +50,7 @@ class Repeatable < Activity
       if is_repeated_day(date)
         new_act = self.dup
         new_act.show_date = date
-        if period != -1
+        if period != NO_EXPIRATION
           new_act.expiration_date = 
             date.advance(:days => period)
         end
@@ -285,7 +289,7 @@ class Repeatable < Activity
               start_date, end_date)
     end
 
-    # return size * reward value
+    # return size * penalty value
     return (the_reps.size * node.penalty) + child_count
   end
   
@@ -349,18 +353,19 @@ class Repeatable < Activity
       return
     end
 
-
-    # only set as incomplete if before expiration
-    if self.expiration_date.nil? or 
-        self.expiration_date >= Date.current 
-      self.state = Activity::INCOMPLETE
-    else
-      self.state = Activity::EXPIRED
+    if self.state == Activity::COMPLETE
+      # only set as incomplete if before expiration
+      if self.expiration_date.nil? or 
+          self.expiration_date >= Date.current 
+        self.state = Activity::INCOMPLETE
+      else
+        self.state = Activity::EXPIRED
+      end
+      self.completed_date = nil
+      self.save!
+      self.rep_parent.count = self.rep_parent.count - 1
+      self.rep_parent.save!
     end
-    self.completed_date = nil
-    self.save!
-    self.rep_parent.count = self.rep_parent.count - 1
-    self.rep_parent.save!
   end
 
   # if a rep parent returns the children
