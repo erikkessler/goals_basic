@@ -13,6 +13,7 @@ class Habit < Repeatable
   # inheritance
   self.inheritance_column = :type
   scope :numberhabits, -> { where(type:'HabitNumber') }
+  scope :weekhabits, -> { where(type:'HabitWeek') }
 
   # Sets state to ARCHIVED_HABIT, deletes all future reps, and calls
   # remove_act on children
