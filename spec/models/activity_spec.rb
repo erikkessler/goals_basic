@@ -289,37 +289,41 @@ describe Activity do
 
     context "weekly payout" do
       it "returns 0 payout when none completed this week" do
-        @grades.week_payout.should == 0
-        @grades.complete
-        @grades.completed_date = Date.new(2014, 02, 14)
-        @math.completed_date = Date.new(2014, 03, 14)
-        @read.completed_date = Date.new(2014, 04, 14)
-        @grades.save!
-        @math.save!
-        @read.save!
-        @grades.week_payout.should == 0
-        @read.incomplete
-        @read.complete
-        @grades.week_payout.should == 3
-        @math.expiration_date = Date.new(2014, 05, 27)
-        @math.state = Activity::EXPIRED
-        @math.save
-        @grades.week_payout.should == 1
+        Timecop.freeze(Date.new(2014,5,30)) do
+          @grades.week_payout.should == 0
+          @grades.complete
+          @grades.completed_date = Date.new(2014, 02, 14)
+          @math.completed_date = Date.new(2014, 03, 14)
+          @read.completed_date = Date.new(2014, 04, 14)
+          @grades.save!
+          @math.save!
+          @read.save!
+          @grades.week_payout.should == 0
+          @read.incomplete
+          @read.complete
+          @grades.week_payout.should == 3
+          @math.expiration_date = Date.new(2014, 05, 27)
+          @math.state = Activity::EXPIRED
+          @math.save
+          @grades.week_payout(Date.new(2014,5,30)).should == 1
+        end
       end
 
       it "returns 18 when all completed this week" do
-        @grades.complete
-        @grades.week_payout.should == 18
-        @grades.expiration_date = Date.new(2014, 05, 27)
-        @grades.state = Activity::EXPIRED
-        @grades.save!
-        @math.expiration_date = Date.new(2014, 05, 27)
-        @math.state = Activity::EXPIRED
-        @math.save!
-        @read.expiration_date = Date.new(2014, 05, 27)
-        @read.state = Activity::EXPIRED
-        @read.save!
-        @grades.week_payout.should == -22
+        Timecop.freeze(Date.new(2014,5,30)) do
+          @grades.complete
+          @grades.week_payout.should == 18
+          @grades.expiration_date = Date.new(2014, 05, 27)
+          @grades.state = Activity::EXPIRED
+          @grades.save!
+          @math.expiration_date = Date.new(2014, 05, 27)
+          @math.state = Activity::EXPIRED
+          @math.save!
+          @read.expiration_date = Date.new(2014, 05, 27)
+          @read.state = Activity::EXPIRED
+          @read.save!
+          @grades.week_payout.should == -22
+        end
       end
     end
   end

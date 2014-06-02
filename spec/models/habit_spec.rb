@@ -101,6 +101,7 @@ describe Habit do
 
       it "sets as expired if after" do
         Timecop.freeze(Date.new(2014,3,12)) do
+          @rep.complete
           @rep.incomplete
           @rep.state.should == Activity::EXPIRED
        

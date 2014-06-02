@@ -55,12 +55,14 @@ describe Repeatable do
       end
 
       it "generates correct # of reps" do
-        @repable.repititions.size.should == 0
-        @repable.gen_reps
-        @repable.repititions.size.should == 8
-        mwf = create(:mwf_repeatable)
-        mwf.gen_reps
-        mwf.repititions.size.should == 3
+        Timecop.freeze(Date.new(2014,5,31)) do
+          @repable.repititions.size.should == 0
+          @repable.gen_reps
+          @repable.repititions.size.should == 8
+          mwf = create(:mwf_repeatable)
+          mwf.gen_reps
+          mwf.repititions.size.should == 3
+        end
       end
     end
 
@@ -246,6 +248,7 @@ describe Repeatable do
 
       it "incomplete leaves expired as expired" do
         Timecop.freeze(Date.new(2014,3,11)) do
+          @daily.repititions.where(:show_date => Date.new(2014, 3, 8))[0].complete
           @daily.repititions.where(:show_date => Date.new(2014, 3, 8))[0].incomplete
           @daily.repititions.where(:show_date => Date.new(2014, 3, 8))[0].state.should == Activity::EXPIRED
         end
@@ -253,6 +256,7 @@ describe Repeatable do
       
       it "incomplete makes expired complete expired" do
         Timecop.freeze(Date.new(2014,3,11)) do
+          @daily.repititions.where(:show_date => Date.new(2014, 3, 9))[0].complete
           @daily.repititions.where(:show_date => Date.new(2014, 3, 9))[0].incomplete
           @daily.repititions.where(:show_date => Date.new(2014, 3, 9))[0].state.should == Activity::EXPIRED
           @daily.repititions.where(:show_date => Date.new(2014, 3, 9))[0].completed_date.should == nil
@@ -291,25 +295,6 @@ describe Repeatable do
           @act.state.should == Activity::INCOMPLETE
         end
       end
-    end
-  end
-
-  describe Habit do
-    
-    it "has a valid factory" do
-      create(:habit).should be_valid
-    end
-
-    it "is invalid without a name" do
-      build(:habit, name: nil).should_not be_valid
-    end
-
-    it "is an activity" do
-      rep = create(:habit)
-      rep.is_a?(Activity).should == true
-      rep.is_a?(Repeatable).should == true
-      rep.is_a?(Habit).should == true
-      rep.is_a?(FullTask).should == false
     end
   end
 end

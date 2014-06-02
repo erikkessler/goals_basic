@@ -17,6 +17,7 @@ class Activity < ActiveRecord::Base
   scope :full_tasks, -> { where(type:'FullTask') }
   scope :partial_tasks, -> { where(type:'PartialTask') }
   scope :repeatables, -> { where(type:'Repeatable') }
+  scope :goals, -> { where(type:'Goal') }
 
   # constants for state 
   INCOMPLETE = 0
@@ -102,24 +103,26 @@ class Activity < ActiveRecord::Base
 
   # set activity's state to incomplete and call on all children
   def incomplete
-    # only set as incomplete if before expiration
-    if self.expiration_date.nil? or 
-        self.expiration_date >= Date.current 
-      self.state = Activity::INCOMPLETE
-    else
-      self.state = Activity::EXPIRED
+    if self.state != INCOMPLETE or self.state != EXPIRED
+      # only set as incomplete if before expiration
+      if self.expiration_date.nil? or 
+          self.expiration_date >= Date.current 
+        self.state = INCOMPLETE
+      else
+        self.state = EXPIRED
+      end
+      self.completed_date = nil
+      self.save!
+
+      # refresh parent's completeness
+      if !parent.nil?
+        parent.is_complete?
+      end
     end
-    self.completed_date = nil
-    self.save!
 
     # call incomplete on each child
     self.children.each do |child|
       child.incomplete
-    end
-
-    # refresh parent's completeness
-    if !parent.nil?
-      parent.is_complete?
     end
   end
   
