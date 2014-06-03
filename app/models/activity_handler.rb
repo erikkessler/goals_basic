@@ -17,19 +17,21 @@ class ActivityHandler < ActiveRecord::Base
     type_group_id = params[:type_group]
     case TypeGroup.find(type_group_id).name
     when 'Basic Task'
-      if params[:internal] == true 
-        ActivityHelper.create_activity(FULL_TASK, params)
+      if params[:internal] == 1.to_s 
+        return ActivityHelper.create_activity(FULL_TASK, params)
       else
-        ActivityHelper.create_activity(PARTIAL_TASK, params)
+        return ActivityHelper.create_activity(PARTIAL_TASK, params)
       end
     when 'Habit'
       # incomplete
-      logger.debug "Habit creation not yet complete"
+      Rails.logger.debug "Habit creation not yet complete"
     when 'Goal'
       # incomplete
-      logger.debug "Goal creation not yet complete"
+      Rails.logger.debug "Goal creation not yet complete"
     else
-      logger.debug "Invalid TypeGroup"
+      Rails.logger.debug "Invalid TypeGroup"
+      return false
     end
   end
+
 end

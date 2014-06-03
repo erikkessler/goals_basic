@@ -38,4 +38,8 @@ goal_group = TypeGroup.create(name: 'Goal',
                               description: 'Long term, short term, and weekly')
 goal_group.types << goals
 
+# handler
+if ActivityHandler.all.size == 0
+  ActivityHandler.create
+end
 

@@ -1,0 +1,23 @@
+<%= form_tag('/activity_handler') do %>
+  <%= label_tag 'name', 'Task Name' %><br>
+  <%= text_field_tag 'name' %></br></br>
+  <%= label_tag 'description', 'Task Description' %><br>
+  <%= text_area_tag 'description' %></br></br>
+  <%= label_tag 'show_date', 'Date to Show Task' %></br>
+  <%= date_field_tag 'show_date' %></br></br>
+  <%= label_tag 'expiration_date', 'Date to Task Expires' %></br>
+  <%= date_field_tag 'expiration_date' %></br></br>
+  <%= label_tag 'reward', 'Reward' %><br>
+  <%= number_field_tag 'reward', nil, min: 0 %></br></br>
+  <%= label_tag 'penalty', 'Penalty' %><br>
+  <%= number_field_tag 'penalty', nil, min: 0 %></br></br>
+  <%= check_box_tag 'internal' %>
+  <%= label_tag 'internal', 'Task is complete if children are' %><br></br>
+  <%= label_tag 'parent_id', 'Task\'s Parent' %></br>
+  <%= select_tag 'parent_id', options_from_collection_for_select(@activities,
+								 "id",
+								 "name"),
+      include_blank: true %></br></br>
+  <%= hidden_field_tag 'type_group', 1 %>
+  <%= submit_tag "Save Task" %>
+<% end %>
