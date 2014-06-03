@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140603134832) do
+ActiveRecord::Schema.define(version: 20140603145406) do
 
   create_table "activities", force: true do |t|
     t.integer  "repeated"
@@ -39,6 +39,11 @@ ActiveRecord::Schema.define(version: 20140603134832) do
   end
 
   add_index "activities", ["parent_id"], name: "index_activities_on_parent_id"
+
+  create_table "activity_handlers", force: true do |t|
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
 
   create_table "type_groups", force: true do |t|
     t.string   "name"
