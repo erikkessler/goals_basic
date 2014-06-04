@@ -35,4 +35,10 @@ class ActivityHandlerController < ApplicationController
   def index
     redirect_to :action => "today"
   end
+
+  def toggle
+    handler = ActivityHandler.find(1)
+    flash[:notice] = handler.toggle(params[:id])
+    redirect_to :action => "today"
+  end
 end

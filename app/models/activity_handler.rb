@@ -39,6 +39,18 @@ class ActivityHandler < ActiveRecord::Base
                                  Activity::INCOMPLETE, Activity::OVERDUE, nil)
   end
 
+  def toggle(id)
+    activity = Activity.find(id)
+    state = activity.state
+    if state == Activity::COMPLETE
+      activity.incomplete
+      return "Set #{activity.name} to incomplete..."
+    elsif state == Activity::INCOMPLETE or Activity::OVERDUE
+      activity.complete
+      return "Completed #{activity.name}!"
+    end
+  end
+
   def get_today
     today = { }
     today[:complete] = Activity.

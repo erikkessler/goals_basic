@@ -1,6 +1,7 @@
 Rails.application.routes.draw do
 
   get 'today' => 'activity_handler#today'
+  get 'toggle/:id' => 'activity_handler#toggle'
   resources :activity_handler
 
   root 'activity_handler#today'
