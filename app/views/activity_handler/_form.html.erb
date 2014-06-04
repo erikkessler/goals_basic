@@ -25,12 +25,9 @@
   <%= check_box_tag 'internal', "1", @values[:internal] == "1" %>
   <%= label_tag 'internal', 'Task is complete if children are' %><br></br>
   <%= label_tag 'parent_id', 'Task\'s Parent' %></br>
-  <%= select_tag 'parent_id', options_from_collection_for_select(@activities,
-								 "id",
-								 "name",
-								 @values
-								 [:parent_id]
-								   .to_i),
+  <%= select_tag 'parent_id', 
+      options_from_collection_for_select(@activities,"id", "name",
+					 @values[:parent_id].to_i),
       include_blank: true %></br></br>
   <%= hidden_field_tag 'type_group', 1 %>
   <%= submit_tag "Save Task" %>
