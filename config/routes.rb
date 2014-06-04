@@ -1,7 +1,9 @@
 Rails.application.routes.draw do
 
-  get 'activity_handler/today' => 'activity_handler#today'
+  get 'today' => 'activity_handler#today'
   resources :activity_handler
+
+  root 'activity_handler#today'
   
   # The priority is based upon order of creation: first created -> highest priority.
   # See how all your routes lay out with "rake routes".

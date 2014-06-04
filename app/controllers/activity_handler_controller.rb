@@ -13,7 +13,7 @@ class ActivityHandlerController < ApplicationController
     @activities = handler.get_parentable
     @errors = handler.create_activity(params)
     if !@errors[:new_act].nil?
-      redirect_to :action => "show", :id => @errors[:new_act].id
+      redirect_to :action => "today"
     else
       render 'new'
     end
@@ -30,5 +30,9 @@ class ActivityHandlerController < ApplicationController
     @incomplete = today[:incomplete]
     @overdue = today[:overdue]
 
+  end
+
+  def index
+    redirect_to :action => "today"
   end
 end

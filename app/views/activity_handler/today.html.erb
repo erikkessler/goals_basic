@@ -1,9 +1,10 @@
-<h1>Today's Activities</h1><br>
+<h1>Today's Activities</h1> 
+<%= link_to "add activity", new_activity_handler_path %><br>
 <% if !@overdue.empty? %>
   <h3>Overdue:</h3>
   <ul>
   <% @overdue.each do |act| %>
-    <li><%= act.name %></li>
+    <li><%= link_to act.name, controller: "activity_handler", action: "show", id: act.id %></li>
   <% end %>
   </ul>
 <% end %>
@@ -11,7 +12,7 @@
   <h3>Scheduled for Today:</h3>
   <ul>
   <% @incomplete.each do |act| %>
-    <li><%= act.name %></li>
+    <li><%= link_to act.name, controller: "activity_handler", action: "show", id: act.id %></li>
   <% end %>
   </ul>
 <% end %>
@@ -19,7 +20,7 @@
   <h3>Complete:</h3>
   <ul>
   <% @complete.each do |act| %>
-    <li><%= act.name %></li>
+    <li><%= link_to act.name, controller: "activity_handler", action: "show", id: act.id %></li>
   <% end %>
   </ul>
 <% end %>
