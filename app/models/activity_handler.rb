@@ -34,4 +34,8 @@ class ActivityHandler < ActiveRecord::Base
     end
   end
 
+  def get_parentable
+    return Activity.where("state is ? AND rep_parent_id is ?",
+                                 Activity::INCOMPLETE, nil)
+  end
 end
