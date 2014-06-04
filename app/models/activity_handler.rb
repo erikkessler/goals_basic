@@ -64,4 +64,10 @@ class ActivityHandler < ActiveRecord::Base
             Activity::OVERDUE, nil)
     return today
   end
+
+  def remove_act(id)
+    activity = Activity.find(id)
+    activity.remove_act
+    return "Removed #{activity.name}!"
+  end
 end

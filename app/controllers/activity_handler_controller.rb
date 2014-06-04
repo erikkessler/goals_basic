@@ -41,4 +41,10 @@ class ActivityHandlerController < ApplicationController
     flash[:notice] = handler.toggle(params[:id])
     redirect_to :action => "today"
   end
+
+  def destroy
+    handler = ActivityHandler.find(1)
+    flash[:notice] = handler.remove_act(params[:id])
+    redirect_to :action => "today"
+  end
 end

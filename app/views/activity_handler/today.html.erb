@@ -4,7 +4,7 @@
   <h3>Overdue:</h3>
   <ul>
   <% @overdue.each do |act| %>
-    <li><%= link_to act.name, controller: "activity_handler", action: "show", id: act.id %> | <%= link_to "Complete",  controller: "activity_handler", action: "toggle", id: act.id %></li>
+    <li><%= link_to act.name, controller: "activity_handler", action: "show", id: act.id %> | <%= link_to "Complete",  controller: "activity_handler", action: "toggle", id: act.id %> | <%= link_to "Remove", activity_handler_path(act.id), method: :delete %></li>
   <% end %>
   </ul>
 <% end %>
@@ -12,7 +12,7 @@
   <h3>Scheduled for Today:</h3>
   <ul>
   <% @incomplete.each do |act| %>
-    <li><%= link_to act.name, controller: "activity_handler", action: "show", id: act.id %> | <%= link_to "Complete",  controller: "activity_handler", action: "toggle", id: act.id %></li>
+    <li><%= link_to act.name, controller: "activity_handler", action: "show", id: act.id %> | <%= link_to "Complete",  controller: "activity_handler", action: "toggle", id: act.id %> | <%= link_to "Remove", activity_handler_path(act.id), method: :delete %></li>
   <% end %>
   </ul>
 <% end %>
@@ -20,7 +20,7 @@
   <h3>Complete:</h3>
   <ul>
   <% @complete.each do |act| %>
-    <li><%= link_to act.name, controller: "activity_handler", action: "show", id: act.id %> | <%= link_to "Incomplete",  controller: "activity_handler", action: "toggle", id: act.id %></li>
+    <li><%= link_to act.name, controller: "activity_handler", action: "show", id: act.id %> | <%= link_to "Incomplete",  controller: "activity_handler", action: "toggle", id: act.id %> | <%= link_to "Remove", activity_handler_path(act.id), method: :delete %></li>
   <% end %>
   </ul>
 <% end %>
