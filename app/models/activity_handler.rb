@@ -93,4 +93,24 @@ class ActivityHandler < ActiveRecord::Base
     activity.remove_act
     return "Removed #{activity.name}!"
   end
+
+  def week(date, week_begin)
+    days = {}
+    if date == "this_week"
+      date = Date.current
+    else
+      date = Date.parse(date)
+    end
+
+    first_date = date.
+      beginning_of_week(start_date = week_begin)
+
+    for i in 0..6
+      add_date= first_date.advance(:days => i)
+      acts = Activity.where(:show_date => add_date)
+      days[add_date] = acts
+    end
+
+    return days
+  end
 end

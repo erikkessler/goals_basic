@@ -76,4 +76,13 @@ class ActivityHandlerController < ApplicationController
       redirect_to :action => "today"
     end
   end
+
+  def week
+    if params[:date].nil?
+      redirect_to :action => "week", :date => 'this_week'
+    else
+      handler = ActivityHandler.find(1)
+      @days = handler.week(params[:date], :monday)
+    end
+  end
 end

@@ -1,0 +1,9 @@
+<h1>Week Overview</h1>
+<% @days.each do |day, acts| %>
+  <h3><%= day.to_s %></h3>
+  <ul>
+  <% acts.each do |act| %>
+    <li><%= link_to act.name, controller: "activity_handler", action: "show", id: act.id %></li>
+  <% end %>
+  </ul>
+<% end %>
