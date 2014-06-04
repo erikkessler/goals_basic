@@ -18,28 +18,7 @@ module MyModules
     end
 
     def self.task_creator(type_id, params)
-      errors = { }
-      # ensure it has a show_date
-      if params[:show_date].empty?
-        Rails.logger.debug "No show date for full task"
-        errors[:show_date] = "Must include a date to show the task on"
-      elsif Date.parse(params[:show_date]) < Date.today # TIME ZONE PROBLEM
-        Rails.logger.debug "Show date in past"
-        errors[:show_date] = "Date to show task cannot be in past"
-      end
-
-      # make sure expiration date after show date
-      if !params[:expiration_date].empty? and 
-          (Date.parse(params[:expiration_date]) < Date.parse(params[:show_date]))
-        Rails.logger.debug "Expiration date before show"
-        errors[:expiration_date] = "Expiration date can't be before date of task"
-      end
-
-      # ensure it has a name
-      if params[:name].empty?
-        Rails.logger.debug "No name for full task"
-        errors[:name] = "Must have a name"
-      end
+      errors = form_errors(type_id, params)
 
       if !errors.empty?
         return errors
@@ -66,13 +45,43 @@ module MyModules
 
       # if it has a parent, add activity to it
       parent_id = params[:parent_id]
-      if !parent_id.empty?
+      if !parent_id.empty? and parent_id != new_activity.id
         parent = Activity.find(parent_id)
         parent.add_child(new_activity)
       end
 
       return errors
 
+    end
+
+    def self.form_errors(type_id, params)
+      if type_id == ActivityHandler::FULL_TASK or
+          type_id == ActivityHandler::PARTIAL_TASK
+        errors = { }
+        # ensure it has a show_date
+        if params[:show_date].empty?
+          Rails.logger.debug "No show date for full task"
+          errors[:show_date] = "Must include a date to show the task on"
+        elsif Date.parse(params[:show_date]) < Date.today # TIME ZONE PROBLEM
+          Rails.logger.debug "Show date in past"
+          errors[:show_date] = "Date to show task cannot be in past"
+        end
+
+        # make sure expiration date after show date
+        if !params[:expiration_date].empty? and 
+            (Date.parse(params[:expiration_date]) < Date.parse(params[:show_date]))
+          Rails.logger.debug "Expiration date before show"
+          errors[:expiration_date] = "Expiration date can't be before date of task"
+        end
+
+        # ensure it has a name
+        if params[:name].empty?
+          Rails.logger.debug "No name for full task"
+          errors[:name] = "Must have a name"
+        end
+
+        return errors
+      end
     end
   end
 end

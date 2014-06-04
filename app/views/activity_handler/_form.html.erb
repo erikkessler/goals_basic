@@ -9,7 +9,7 @@
   </div>
 <% end %>
 
-<%= form_tag('/activity_handler') do %>
+<%= form_tag(@path, method: @method) do %>
   <%= label_tag 'name', 'Task Name' %><br>
   <%= text_field_tag 'name', @values[:name] %></br></br>
   <%= label_tag 'description', 'Task Description' %><br>
