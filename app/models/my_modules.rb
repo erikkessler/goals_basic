@@ -55,12 +55,14 @@ module MyModules
                                        penalty: params[:penalty])
       elsif type_id == ActivityHandler::PARTIAL_TASK
         new_activity = PartialTask.create(name: params[:name], 
-                                          show_date: [:show_date], 
+                                          show_date: params[:show_date], 
                                           description: params[:description],
                                           expiration_date: params[:expiration_date],
                                           reward: params[:reward],
                                           penalty: params[:penalty])
       end
+
+      errors[:new_act] = new_activity
 
       # if it has a parent, add activity to it
       parent_id = params[:parent_id]

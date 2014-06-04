@@ -1,0 +1,34 @@
+<p>
+  <strong>Title:</strong>
+  <%= @activity.name  %>
+  </br>
+  <strong>Description:</strong>
+  <%= @activity.description %>
+  </br>
+  <strong>Date:</strong>
+  <%= @activity.show_date %>
+  </br>
+  <strong>Expiration Date:</strong>
+  <%= @activity.expiration_date %>
+  </br>
+  <strong>Reward:</strong>
+  <%= @activity.reward %>
+  </br>
+  <strong>Penalty:</strong>
+  <%= @activity.penalty %>
+  </br>
+  <strong>Parent:</strong>
+  <% if !@activity.parent.nil? %>
+    <%= @activity.parent.name %>
+  <% end %>
+  </br>
+  <strong>Children:</strong>
+  <ul>
+  <% @activity.children.each do |child| %>
+    <li><%= child.name %></li>
+  <% end %>
+  </ul>
+  <strong>Complete:</strong>
+  <%= @activity.is_complete? %>
+  </br>
+</p>
