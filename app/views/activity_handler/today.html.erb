@@ -1,0 +1,25 @@
+<h1>Today's Activities</h1><br>
+<% if !@overdue.empty? %>
+  <h3>Overdue:</h3>
+  <ul>
+  <% @overdue.each do |act| %>
+    <li><%= act.name %></li>
+  <% end %>
+  </ul>
+<% end %>
+<% if !@incomplete.empty? %>
+  <h3>Scheduled for Today:</h3>
+  <ul>
+  <% @incomplete.each do |act| %>
+    <li><%= act.name %></li>
+  <% end %>
+  </ul>
+<% end %>
+<% if !@complete.empty? %>
+  <h3>Complete:</h3>
+  <ul>
+  <% @complete.each do |act| %>
+    <li><%= act.name %></li>
+  <% end %>
+  </ul>
+<% end %>

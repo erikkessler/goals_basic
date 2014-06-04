@@ -35,7 +35,21 @@ class ActivityHandler < ActiveRecord::Base
   end
 
   def get_parentable
-    return Activity.where("state is ? AND rep_parent_id is ?",
-                                 Activity::INCOMPLETE, nil)
+    return Activity.where("state is ? OR state is ? AND rep_parent_id is ?",
+                                 Activity::INCOMPLETE, Activity::OVERDUE, nil)
+  end
+
+  def get_today
+    today = { }
+    today[:complete] = Activity.
+      where("state is ? AND rep_parent_id is ? AND show_date is ?", 
+            Activity::COMPLETE, nil, Date.current)
+    today[:incomplete] = Activity.
+      where("state is ? AND rep_parent_id is ? AND show_date is ?", 
+            Activity::INCOMPLETE, nil, Date.current)
+    today[:overdue] = Activity.
+      where("state is ? AND rep_parent_id is ?", 
+            Activity::OVERDUE, nil)
+    return today
   end
 end

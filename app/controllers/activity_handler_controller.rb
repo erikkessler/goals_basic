@@ -24,7 +24,11 @@ class ActivityHandlerController < ApplicationController
   end
 
   def today
-    
+    handler = ActivityHandler.find(1)
+    today = handler.get_today
+    @complete = today[:complete]
+    @incomplete = today[:incomplete]
+    @overdue = today[:overdue]
 
   end
 end
