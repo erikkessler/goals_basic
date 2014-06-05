@@ -190,6 +190,7 @@ module MyModules
             errors[:weeks] = "Number of weeks must be positive (or blank)"
           end
         end
+
         return errors
       end
     end
