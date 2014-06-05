@@ -1,0 +1,13 @@
+<h1>Overview</h1>
+<% def self.print_act(act) %>
+<li><%= act.name %></li>
+<ul>
+<% act.children.each do |child|
+    print_act(child)
+   end%>
+</ul>
+<% end %>
+<ul><% @roots.each do |root|
+	 print_act(root)
+       end%>
+</ul>
