@@ -9,12 +9,14 @@
   </ul>
 <% end %>
 <% if !@incomplete.empty? %>
+  <div id="today">
   <h3>Scheduled for Today:</h3>
   <ul>
   <% @incomplete.each do |act| %>
     <li><%= link_to act.name, controller: "activity_handler", action: "show", id: act.id %> | <%= link_to "Complete",  controller: "activity_handler", action: "toggle", id: act.id %> | <%= link_to "Remove", activity_handler_path(act.id), method: :delete %> | <%= link_to "Edit", edit_activity_handler_path(act.id) %></li>
   <% end %>
   </ul>
+  </div>
 <% end %>
 <% if !@complete.empty? %>
   <h3>Complete:</h3>
