@@ -102,14 +102,14 @@ class ActivityHandler < ActiveRecord::Base
   def get_today
     today = { }
     today[:complete] = Activity.
-      where("state is ? AND rep_parent_id is ? AND show_date is ?", 
-            Activity::COMPLETE, nil, Date.current)
+      where("state is ? AND show_date is ?", 
+            Activity::COMPLETE, Date.current)
     today[:incomplete] = Activity.
-      where("state is ? AND rep_parent_id is ? AND show_date is ?", 
-            Activity::INCOMPLETE, nil, Date.current)
+      where("state is ? AND show_date is ?", 
+            Activity::INCOMPLETE, Date.current)
     today[:overdue] = Activity.
-      where("state is ? AND rep_parent_id is ?", 
-            Activity::OVERDUE, nil)
+      where("state is ?", 
+            Activity::OVERDUE)
     return today
   end
 

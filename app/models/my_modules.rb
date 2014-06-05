@@ -68,7 +68,66 @@ module MyModules
         return errors
       end
       
+      new_activity = nil
+      period = params[:period]
+      if period.empty?
+        period = Repeatable::NO_EXPIRATION
+      else
+        period = period.to_i
+      end
+      if type_id == ActivityHandler::HABIT
+        new_activity = Habit.create(name: params[:name],
+                                    description: params[:description],
+                                    expiration_date: params[:expiration_date],
+                                    reward: params[:reward],
+                                    penalty: params[:penalty],
+                                    period: period)
+                                    
+      elsif type_id == ActivtiyHandler::HABIT_NUMBER
+        new_activity = HabitNumber.create(name: params[:name],
+                                          description: params[:description],
+                                          expiration_date: params[:expiration_date],
+                                          reward: params[:reward],
+                                          penalty: params[:penalty],
+                                          period: period,
+                                          count_goal: params[:total])
+      elsif type_id == ActivityHadler::HABIT_WEEK
+        weeks = params[:weeks]
+        if weeks.empty?
+          weeks = -1
+        end
+        new_activity = HabitWeek.create(name: params[:name],
+                                        description: params[:description],
+                                        expiration_date: params[:expiration_date],
+                                        reward: params[:reward],
+                                        penalty: params[:penalty],
+                                        period: period,
+                                        count: params[:per_week],
+                                        count_goal: weeks)
+      end
+
+      errors[:new_act] = new_activity
+
+      # if it has a parent, add activity to it
+      parent_id = params[:parent_id]
+      if !parent_id.empty? and parent_id != new_activity.id
+        parent = Activity.find(parent_id)
+        parent.add_child(new_activity)
+      end
+
+      repeated = params[:repeated]
+      repeated = repeated.collect { |i| i.to_i }
+      new_activity.set_repeated(repeated)
+      new_activity.reload
       
+      if params[:expiration_date].empty?
+        handler = ActivityHandler.find(1)
+        new_activity.gen_reps(Date.current, handler.upto_date, period)
+      else
+        new_activity.gen_reps(Date.current, Date.parse(params[:expiration_date]), period)
+      end
+
+      return errors
     end
     
     def self.basic_errors(params)
@@ -146,7 +205,7 @@ module MyModules
         end
 
         # ensure period valid
-        if params[:period].to_i <= 0
+        if !params[:period].empty? and params[:period].to_i <= 0
           Rails.logger.debug "Period is invalid"
           errors[:period] = "Period must be blank (infinte) or greater than 0"
         end

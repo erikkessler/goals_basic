@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140603145406) do
+ActiveRecord::Schema.define(version: 20140605230217) do
 
   create_table "activities", force: true do |t|
     t.integer  "repeated"
@@ -36,6 +36,7 @@ ActiveRecord::Schema.define(version: 20140603145406) do
     t.integer  "count",            default: 0,    null: false
     t.integer  "count_goal"
     t.boolean  "is_root",          default: true, null: false
+    t.integer  "period"
   end
 
   add_index "activities", ["parent_id"], name: "index_activities_on_parent_id"
@@ -43,6 +44,8 @@ ActiveRecord::Schema.define(version: 20140603145406) do
   create_table "activity_handlers", force: true do |t|
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.date     "reset_date"
+    t.date     "upto_date"
   end
 
   create_table "type_groups", force: true do |t|
