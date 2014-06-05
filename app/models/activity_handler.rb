@@ -62,6 +62,13 @@ class ActivityHandler < ActiveRecord::Base
                                  Activity::INCOMPLETE, Activity::OVERDUE, nil)
   end
 
+  def it_and_children(id)
+    it_children = [ ] 
+    it_children << (id)
+    Activity.find(id).children.each{ |child| it_children << it_and_children(child.id) }
+    return it_children
+  end
+
   def toggle(id)
     activity = Activity.find(id)
     state = activity.state
@@ -88,9 +95,48 @@ class ActivityHandler < ActiveRecord::Base
     return today
   end
 
+  def update_act(params)
+    children = Activity.find(params[:id]).children
+    Activity.find(params[:id]).destroy
+    new_act_id = create_activity(params)[:new_act].id
+    children.each do |child|
+      child.parent_id = new_act_id
+      child.save!
+    end
+  end
+
   def remove_act(id)
     activity = Activity.find(id)
     activity.remove_act
     return "Removed #{activity.name}!"
+  end
+
+  def week(date, week_begin)
+    days = {}
+    if date == "this_week"
+      date = Date.current
+    else
+      date = Date.parse(date)
+    end
+
+    first_date = date.
+      beginning_of_week(start_date = week_begin)
+
+    for i in 0..6
+      add_date= first_date.advance(:days => i)
+      acts = Activity.where(:show_date => add_date)
+      days[add_date] = acts
+    end
+
+    return days
+  end
+
+  def roots(all = false)
+    if all
+      return Activity.where("rep_parent_id is ? AND is_root is ?", nil, true)
+    else 
+      return Activity.where("rep_parent_id is ? AND (state is ? OR state is ?) AND is_root is ?",
+                            nil, Activity::INCOMPLETE, Activity::OVERDUE, true)
+    end
   end
 end

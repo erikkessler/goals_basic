@@ -54,7 +54,7 @@ class ActivityHandlerController < ApplicationController
 
   def edit
     handler = ActivityHandler.find(1)
-    @activities = handler.get_parentable.where.not(:id => params[:id])
+    @activities = handler.get_parentable.where.not(:id => handler.it_and_children(params[:id]))
     @errors = { }
     @values = Activity.find(params[:id]).attributes.symbolize_keys 
     @method = :patch
@@ -66,14 +66,27 @@ class ActivityHandlerController < ApplicationController
     @errors = handler.check_form_errors(params)
     if !@errors.empty?
       @values = params
-      @activities = handler.get_parentable.where.not(:id => params[:id])
+      @activities = handler.get_parentable.where.not(:id => handler.it_and_children(params[:id]))
       @method = :patch
       @path = "/activity_handler/#{params[:id]}"
       render 'edit'
     else
-      Activity.find(params[:id]).destroy
-      handler.create_activity(params)
+      handler.update_act(params)
       redirect_to :action => "today"
     end
+  end
+
+  def week
+    if params[:date].nil?
+      redirect_to :action => "week", :date => 'this_week'
+    else
+      handler = ActivityHandler.find(1)
+      @days = handler.week(params[:date], :monday)
+    end
+  end
+
+  def overview
+    handler = ActivityHandler.find(1)
+    @roots = handler.roots
   end
 end

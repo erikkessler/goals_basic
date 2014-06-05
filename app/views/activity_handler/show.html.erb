@@ -32,4 +32,4 @@
   <%= @activity.is_complete? %>
   </br>
 </p>
-<%= link_to "Back", today_path %> | <%= link_to "Edit", edit_activity_handler_path(@activity.id) %>
+<%= link_to "Back", today_path %> | <%= link_to "Edit", edit_activity_handler_path(@activity.id) %> | <%= link_to "Remove", activity_handler_path(@activity.id), method: :delete %>
