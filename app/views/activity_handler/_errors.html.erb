@@ -1,0 +1,11 @@
+<% if !@errors.empty?  %>
+  <div id="error_explaination">
+  <h2><%= pluralize(@errors.count, "error") %> 
+      prohibited this activity from being saved:</h2>
+    <ul>
+      <% @errors.each do |k,v| %>
+        <li><%= v %></li>
+      <% end %>
+    </ul>
+  </div>
+<% end %>

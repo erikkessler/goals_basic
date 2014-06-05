@@ -1,13 +1,4 @@
-<% if !@errors.empty?  %>
-  <h2><%= pluralize(@errors.count, "error") %> 
-      prohibited this activity from being saved:</h2>
-    <ul>
-      <% @errors.each do |k,v| %>
-        <li><%= v %></li>
-      <% end %>
-    </ul>
-  </div>
-<% end %>
+<%= render 'errors' %>
 
 <%= form_tag(@path, method: @method) do %>
   <%= label_tag 'name', 'Task Name' %><br>
