@@ -7,6 +7,13 @@
   <%= csrf_meta_tags %>
 </head>
 <body>
+
+  <div id="user_nav">
+    <%= link_to "Today", today_path %>
+    <%= link_to "Week", week_path %>
+    <%= link_to "Overview", overview_path %>
+</div>
+
   <% if flash[:notice] %>
     <div class="notice"><%= flash[:notice] %></div>
   <% end %>
