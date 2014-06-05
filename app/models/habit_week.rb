@@ -233,7 +233,7 @@ class HabitDate < Habit
           if node.count_goal < 0
             week_count = node.count_goal - 1000
             node.count_goal = week_count
-            if  node.expiration_date >= Date.current
+            if  node.expiration_date.nil? or node.expiration_date >= Date.current
               node.state = Activity::INCOMPLETE
             else
               node.state = Activity::EXPIRED
@@ -248,7 +248,7 @@ class HabitDate < Habit
           
           # if goal_count is now 1 then not complete anymore
           if week_count == 1
-            if  node.expiration_date >= Date.current
+            if  node.expiration_date.nil? or node.expiration_date >= Date.current
               node.state = Activity::INCOMPLETE
             else
               node.state = Activity::EXPIRED

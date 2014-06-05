@@ -145,6 +145,12 @@ module MyModules
           errors[:repeated] = "Must repeat at least one day of week"
         end
 
+        # ensure period valid
+        if params[:period].to_i <= 0
+          Rails.logger.debug "Period is invalid"
+          errors[:period] = "Period must be blank (infinte) or greater than 0"
+        end
+
         # expiration date in future
         if !params[:expiration_date].empty?
           begin
@@ -158,6 +164,32 @@ module MyModules
           end
         end
 
+        # if habit number need a total
+        if type_id == ActivityHandler::HABIT_NUMBER
+          if params[:total].empty?
+            Rails.logger.debug "Need a total number of completions"
+            errors[:expiration_date] = "Must specify required number of completions"
+          elsif params[:total].to_i <= 0
+            Rails.logger.debug "Total needed not positive"
+            errors[:expiration_date] = "Total completions required must be positive"
+          end
+        end
+
+        # if habit week need per week 
+        if type_id == ActivityHandler::HABIT_WEEK
+          if params[:per_week].empty?
+            Rails.logger.debug "Need a number of completionsper week"
+            errors[:expiration_date] = "Must specify required number of completions per week"
+          elsif params[:total].to_i <= 0
+            Rails.logger.debug "Per week needed not positive"
+            errors[:expiration_date] = "Completions per week must be positive"
+          end
+
+          if !params[:weeks].empty? and params[:weeks] <= 0
+            Rails.logger.debug "Weeks is not positive"
+            errors[:weeks] = "Number of weeks must be positive (or blank)"
+          end
+        end
         return errors
       end
     end

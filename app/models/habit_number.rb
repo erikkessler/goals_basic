@@ -104,6 +104,8 @@ class HabitNumber < Habit
     # return size * penalty value
     if start_date.nil? or end_date.nil?
       return (node.penalty + child_count)
+    elsif node.expiration_date.nil?
+      return child_count
     elsif node.expiration_date >= start_date and
         node.expiration_date <= end_date
       return (node.penalty + child_count)
