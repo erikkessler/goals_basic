@@ -12,8 +12,15 @@ module MyModules
         return task_creator(type_id, params)
       when ActivityHandler::PARTIAL_TASK
         return task_creator(type_id, params)
+      when ActivityHandler::HABIT
+        return habit_creator(type_id, params)
+      when ActivityHandler::HABIT_NUMBER
+        return habit_creator(type_id, params)
+      when ActivityHandler::HABIT_WEEK
+        return habit_creator(type_id, params)
       else
         Rails.logger.debug "Invalid type_id"
+        return { :type_id => "invalid type_id" }
       end
     end
 
@@ -54,30 +61,101 @@ module MyModules
 
     end
 
+    def self.habit_creator(type_id, params)
+      errors = form_errors(type_id, params)
+      
+      if !errors.empty?
+        return errors
+      end
+      
+      
+    end
+    
+    def self.basic_errors(params)
+      errors = { }
+      
+      # ensure it has a name
+      if params[:name].empty?
+        Rails.logger.debug "No name for full task"
+        errors[:name] = "Must have a name"
+      end
+
+      if !params[:reward].empty? and params[:reward].to_i < 0
+        Rails.logger.debug "Reward less than 0"
+        errors[:reward] = "Reward must be greater than 0"
+      end
+
+      if !params[:penalty].empty? and params[:penalty].to_i < 0
+        Rails.logger.debug "Reward less than 0"
+        errors[:penalty] = "Reward must be greater than 0"
+      end
+
+      return errors
+    end
+
     def self.form_errors(type_id, params)
       if type_id == ActivityHandler::FULL_TASK or
           type_id == ActivityHandler::PARTIAL_TASK
-        errors = { }
+        errors = basic_errors(params)
+
+        
         # ensure it has a show_date
         if params[:show_date].empty?
           Rails.logger.debug "No show date for full task"
           errors[:show_date] = "Must include a date to show the task on"
-        elsif Date.parse(params[:show_date]) < Date.today # TIME ZONE PROBLEM
-          Rails.logger.debug "Show date in past"
-          errors[:show_date] = "Date to show task cannot be in past"
+        else
+          begin
+            Date.parse(params[:show_date])
+            if Date.parse(params[:show_date]) < Date.today 
+              Rails.logger.debug "Show date in past"
+              errors[:show_date] = "Date to show task cannot be in past"
+            end
+          rescue ArgumentError
+            Rails.logger.debug "Invalid show_date format"
+            errors[:show_date] = "Invalid date for show date"
+          end
         end
+
+        
 
         # make sure expiration date after show date
-        if !params[:expiration_date].empty? and 
+        if !params[:expiration_date].empty? 
+          begin
             (Date.parse(params[:expiration_date]) < Date.parse(params[:show_date]))
-          Rails.logger.debug "Expiration date before show"
-          errors[:expiration_date] = "Expiration date can't be before date of task"
+            Rails.logger.debug "Expiration date before show"
+            errors[:expiration_date] = "Expiration date can't be before date of task"
+          rescue
+            Rails.logger.debug "Invalid expiration_date format"
+            errors[:expiration_date] = "Invalid date for expiration date"
+          end
         end
 
-        # ensure it has a name
-        if params[:name].empty?
-          Rails.logger.debug "No name for full task"
-          errors[:name] = "Must have a name"
+        
+
+        return errors
+
+      elsif type_id == ActivityHandler::HABIT or
+          type_id == ActivityHandler::HABIT_NUMBER or
+          type_id == ActivityHandler::HABIT_WEEK
+        errors = basic_errors(params)
+
+        # ensure at least one repeated day
+        if params[:repeated].nil?
+          Rails.logger.debug "No repeated days"
+          errors[:repeated] = "Must repeat at least one day of week"
+        end
+
+        # expiration date in future
+        if !params[:expiration_date].empty?
+          begin
+            if Date.parse(params[:expiration_date]) <= Date.current 
+              Rails.logger.debug "Expiration date in past"
+              errors[:expiration_date] = "Expiration date must be in future"
+            end
+          rescue
+            Rails.logger.debug "Invalid expiration_date format"
+            errors[:expiration_date] = "Invalid date for expiration date"
+          end
         end
 
         return errors

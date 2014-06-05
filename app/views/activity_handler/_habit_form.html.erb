@@ -1,0 +1,43 @@
+<%= form_tag(@path, method: @method, id: 'habit_form') do %>
+  <%= label_tag 'name', 'Habit Name' %><br>
+  <%= text_field_tag 'name', @values[:name] %></br></br>
+  <%= label_tag 'description', 'Habit Description' %><br>
+  <%= text_area_tag 'description', @values[:description] %></br></br>
+  <%= label_tag 'repeated', 'Days to Repeat' %><br>
+  <% if @values[:repeated].nil?
+       @values[:repeated] = []
+     end
+     days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
+     days.map.with_index do |d, i| %>
+    <%= check_box_tag 'repeated[]', i, @values[:repeated].include?(i) %>
+    <%= label_tag 'repeated[]', d %>
+  <% end %></br></br>
+  <%= label_tag 'habit_type', "Required Completions to Get Reward" %></br>
+  <%= radio_button_tag 'habit_type', 'number', @values[:habit_type] == 'number' %>
+  <%= number_field_tag 'total', @values[:total], min: 1 %>
+  <%= label_tag 'total', " total" %></br>
+  <%= radio_button_tag 'habit_type', 'week', @values[:habit_type] == 'week' %>
+  <%= number_field_tag 'per_week', @values[:per_week], min: 1 %>
+  <%= label_tag 'per_week', " per week" %> 
+  <%= label_tag 'weeks', " for " %>
+  <%= number_field_tag 'weeks', @values[:weeks], min: 1 %>
+  <%= label_tag 'weeks', " weeks" %></br>
+  <%= radio_button_tag 'habit_type', 'week', @values[:habit_type] == 'none' %>
+  <%= label_tag 'none', "none (reward each completion)" %></br></br>
+  <%= label_tag 'expiration_date', 'Date Habit Expires' %></br>
+  <%= date_field_tag 'expiration_date', @values[:expiration_date] %></br></br>
+  <%= label_tag 'period', 'Number of Days to Complete Each Instance of the Habit' %></br>
+  <%= number_field_tag 'period', @values[:period], min: 1 %></br></br>
+  <%= label_tag 'reward', 'Reward' %><br>
+  <%= number_field_tag 'reward', @values[:reward], min: 0 %></br></br>
+  <%= label_tag 'penalty', 'Penalty' %><br>
+  <%= number_field_tag 'penalty', @values[:penalty], min: 0 %></br></br>
+  <%= label_tag 'parent_id', 'Habit\'s Parent' %></br>
+  <%= select_tag 'parent_id', 
+      options_from_collection_for_select(@activities,"id", "name",
+					 @values[:parent_id].to_i),
+      include_blank: true %></br></br>
+  <%= hidden_field_tag 'type_group', 2 %>
+  <%= submit_tag "Save Habit" %>
+<% end %>
+<%= link_to "Cancel", today_path %>

@@ -4,7 +4,7 @@ class ActivityHandlerController < ApplicationController
     handler = ActivityHandler.find(1)
     @activities = handler.get_parentable
     @errors = { }
-    @values = { :show_date => Date.current}
+    @values = { :show_date => Date.current, :habit_type => 'none', :period => 2 }
     @method = :post
     @path = '/activity_handler'
   end

@@ -23,8 +23,18 @@ class ActivityHandler < ActiveRecord::Base
         return ActivityHelper.create_activity(PARTIAL_TASK, params)
       end
     when 'Habit'
-      # incomplete
-      Rails.logger.debug "Habit creation not yet complete"
+      case params[:habit_type]
+      when 'none'
+        return ActivityHelper.create_activity(HABIT, params)
+      when 'number'
+        return ActivityHelper.create_activity(HABIT_NUMBER, params)
+      when 'week'
+        return ActivityHelper.create_activity(HABIT_WEEK, params)
+      else
+        Rails.logger.debug "invalid habit type"
+        return { :habit_type => "invalid habit type" }
+      end
+        
     when 'Goal'
       # incomplete
       Rails.logger.debug "Goal creation not yet complete"
@@ -44,9 +54,17 @@ class ActivityHandler < ActiveRecord::Base
         return ActivityHelper.form_errors(PARTIAL_TASK, params)
       end
     when 'Habit'
-      # incomplete
-      Rails.logger.debug "Habit creation not yet complete"
-      return {}
+      case params[:habit_type]
+      when 'none'
+        return ActivityHelper.form_errors(HABIT, params)
+      when 'number'
+        return ActivityHelper.form_errors(HABIT_NUMBER, params)
+      when 'week'
+        return ActivityHelper.form_errors(HABIT_WEEK, params)
+      else
+        Rails.logger.debug "invalid habit type"
+        return { :habit_type => "invalid habit type" }
+      end
     when 'Goal'
       # incomplete
       Rails.logger.debug "Goal creation not yet complete"
