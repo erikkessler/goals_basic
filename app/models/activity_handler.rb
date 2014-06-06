@@ -76,7 +76,7 @@ class ActivityHandler < ActiveRecord::Base
   end
 
   def get_parentable
-    return Activity.where("state is ? OR state is ? AND rep_parent_id is ?",
+    return Activity.where("(state is ? OR state is ?) AND rep_parent_id is ?",
                                  Activity::INCOMPLETE, Activity::OVERDUE, nil)
   end
 
@@ -155,6 +155,32 @@ class ActivityHandler < ActiveRecord::Base
     else 
       return Activity.where("rep_parent_id is ? AND (state is ? OR state is ?) AND is_root is ?",
                             nil, Activity::INCOMPLETE, Activity::OVERDUE, true)
+    end
+  end
+
+  def get_attributes(params)
+    act = Activity.find(params[:id])
+    if act.class == 'FullTask' or act.class == 'PartialTask'
+      return act.attributes.symbolize_keys 
+    elsif act.class == 'Habit'
+      values = act.attributes.symbolize_keys 
+      values[:habit_type] = 'none'
+      values[:repeated] = act.get_repeated.collect { |d| d.to_s }
+      return values
+    elsif act.class == 'HabitNumber'
+      values = act.attributes.symbolize_keys 
+      values[:habit_type] = 'number'
+      values[:repeated] = act.get_repeated.collect { |d| d.to_s }
+      values[:total] = act.count_goal
+      return values
+    elsif act.class == 'HabitWeek'
+      values = act.attributes.symbolize_keys 
+      values[:habit_type] = 'week'
+      values[:repeated] = act.get_repeated.collect { |d| d.to_s }
+      values[:per_week] = act.count
+      if act.count_goal >= 0
+        values[:weeks] = values
+      return values
     end
   end
 end

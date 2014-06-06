@@ -56,7 +56,7 @@ class ActivityHandlerController < ApplicationController
     handler = ActivityHandler.find(1)
     @activities = handler.get_parentable.where.not(:id => handler.it_and_children(params[:id]))
     @errors = { }
-    @values = Activity.find(params[:id]).attributes.symbolize_keys 
+    @values = handler.get_attributes(params)
     @method = :patch
     @path = "/activity_handler/#{params[:id]}"
   end

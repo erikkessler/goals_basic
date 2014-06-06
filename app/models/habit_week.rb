@@ -5,15 +5,13 @@
 # If the count_goal is less than 0 then there is no number of weeks need to do it for
 # - reward is paid for each complete week.
 
-class HabitDate < Habit
+class HabitWeek < Habit
+  INFINITE_WEEKS = -1
 
   # just return reward as that is the total possible
   def total_reward(start_date = nil, end_date = nil)
     # select rep_parent if it exists
-    node = self
-    if !self.rep_parent.nil?
-      node = self.rep_parent
-    end
+    node = self.get_rep_parent
     
     # recusivly count children
     child_count = 0
@@ -22,7 +20,7 @@ class HabitDate < Habit
     end
 
     # if no week requirement then count number of weeks 
-    if node.count_goal < 0 and !start_date.nil? and !end_date.nil?
+    if node.is_infinite? and !start_date.nil? and !end_date.nil?
       weeks = ((end_date - start_date)/7).to_i
       return ((weeks * node.reward) + child_count)
     else
@@ -33,10 +31,7 @@ class HabitDate < Habit
   # return penalty if there an expiration as that is the total possible penalty
   def total_penalty(start_date = nil, end_date = nil)
     # select rep_parent if it exists
-    node = self
-    if !self.rep_parent.nil?
-      node = self.rep_parent
-    end
+    node = self.get_rep_parent
     
     # recusivly count children
     child_count = 0
@@ -45,7 +40,7 @@ class HabitDate < Habit
     end
 
     # if no week requirement then count number of weeks 
-    if node.count_goal < 0 and !start_date.nil? and !end_date.nil?
+    if node.is_infinite? and !start_date.nil? and !end_date.nil?
       weeks = ((end_date - start_date)/7).to_i
       return ((weeks * node.penalty) + child_count)
     else
@@ -57,10 +52,7 @@ class HabitDate < Habit
   # return the reward if complete or the penalty if expired
   def total_payout
     # make sure we have rep_parent
-    node = self
-    if !self.rep_parent.nil?
-      node = self.rep_parent
-    end
+    node = self.get_rep_parent
     
     # get total payout of children
     child_payout = 0
@@ -69,9 +61,9 @@ class HabitDate < Habit
     end
 
     # if no week requirement then number reward - penalty
-    if node.count_goal < 0
-      rewards = (node.count_goal % -1000) + 1
-      penalties = (node.count_goal / -1000)
+    if node.is_infinite?
+      rewards = node.get_weeks_complete
+      penalties = node.get_weeks_expired
       return (rewards * node.reward) - (penalties * node.penalty) + child_payout
     end
 
@@ -95,10 +87,7 @@ class HabitDate < Habit
     end
 
     # make sure using rep_parent
-    node = self
-    if !self.rep_parent.nil?
-      node = self.rep_parent
-    end
+    node = self.get_rep_parent
 
     # calculate start and end of week
     week_start = date.
@@ -108,29 +97,29 @@ class HabitDate < Habit
     date_range = week_start..week_end
     
     # get payout of children
-    count = 0 
+    child_payout = 0 
     node.children.each do |child|
-      count = count + child.week_payout(date, start_day)
+      child_payout += child.week_payout(date, start_day)
     end
 
     # if no week requirement
-    if node.count_goal < 0
+    if node.is_infinite?
       # get all from this week
       week_reps = self.rep_parent.repititions.
         where("completed_date >= ? AND completed_date <= ?",
               week_start, week_end)
       if week_reps >= node.count
-        return node.reward + count
+        return node.reward + child_payout
       elsif Date.current > week_end
-        return node.penalty + count
+        return node.penalty + child_payout
       else
-        return count
+        return child_payout
       end
         
     end
     
     
-    # get reward/ penalty
+    # there is a week requirement, get reward/ penalty
     act_payout = 0
     if node.state == Activity::COMPLETE and 
         date_range.include? node.completed_date
@@ -141,7 +130,7 @@ class HabitDate < Habit
       
     end
     
-    return count + act_payout
+    return child_payout + act_payout
   end
 
   # marks complete if child or marks rep of the day
@@ -176,9 +165,9 @@ class HabitDate < Habit
         week_reps = node.repititions.
           where("completed_date >= ? AND completed_date <= ?",
                 week_start, week_end)
-        if week_reps.size = node.count
-          week_count = node.count_goal - 1
-          node.count_goal = week_count
+
+        if week_reps.size >= node.count
+          week_count = node.add_complete_week
           if week_count <= 0
             node.state = Activity::COMPLETE
             node.competed_date = DateTime.current
@@ -203,13 +192,13 @@ class HabitDate < Habit
       return
     end
 
-    # if not already complete check if reached count_goal
+    # if not already incomplete check if still at count_goal
     if self.state == Activity::COMPLETE
       if self.expiration_date.nil? or
-          self.expirration_date >= Date.current
+          self.expiration_date >= Date.current
         self.state = Activity::INCOMPLETE
       else
-        self.state = Activity::COMPLETE
+        self.state = Activity::EXPIRED
       end
       self.completed_date = nil
       self.save!
@@ -230,35 +219,88 @@ class HabitDate < Habit
 
         # if less then increment count_goal
         if week_reps.size < node.count
-          if node.count_goal < 0
-            week_count = node.count_goal - 1000
-            node.count_goal = week_count
-            if  node.expiration_date.nil? or node.expiration_date >= Date.current
-              node.state = Activity::INCOMPLETE
-            else
-              node.state = Activity::EXPIRED
-            end
-            node.competed_date = nil
-            node.rep_parent.save!
-            return
+          node.add_incomplete_week
+          if  node.expiration_date.nil? or node.expiration_date >= Date.current
+            node.state = Activity::INCOMPLETE
           else
-            week_count = node.count_goal + 1
-            node.count_goal = week_count
+            node.state = Activity::EXPIRED
           end
-          
-          # if goal_count is now 1 then not complete anymore
-          if week_count == 1
-            if  node.expiration_date.nil? or node.expiration_date >= Date.current
-              node.state = Activity::INCOMPLETE
-            else
-              node.state = Activity::EXPIRED
-            end
-            node.competed_date = nil
-            node.rep_parent.save!
-          end
+          node.competed_date = nil
+          node.rep_parent.save!
         end
       end
+    end 
+  end
+
+  def is_infinite?
+    node = self.get_rep_parent
+    return node.count_goal < 0
+  end
+
+  def set_weeks(weeks)
+    node = self.get_rep_parent
+    if weeks.nil?
+      node.count_goal = (-1 * node.get_weeks_complete) + INFINITE_WEEKS
+      node.save!
+    else
+      node.count_goal = node.get_weeks_complete + (weeks * 1000)
+      node.save!
     end
   end
 
+  def get_weeks_complete
+    node = self.get_rep_parent
+    if node.count_goal.nil?
+      return 0
+    elsif node.is_infinite?
+      return ((1000 - (node.count_goal % 1000)) - 1)
+    else
+      return (node.count_goal % 1000)
+    end
+  end
+
+  def get_expired_weeks
+    node = self.get_rep_parent
+    if node.is_infinite?
+      return ((node.count_goal / 1000) * -1)
+    else
+      return nil
+    end
+  end
+
+  def weeks_needed
+    node = self.get_rep_parent
+    if node.is_infinite?
+      return nil
+    else
+      return (node.count_goal / 1000)
+    end
+  end
+
+  protected
+  def add_complete_week
+    node = self.get_rep_parent
+    if node.is_infinite?
+      node.count_goal -= 1
+    else
+      node.count_goal += 1
+    end
+  end
+
+  def add_incomplete_week
+    node = self.get_rep_parent
+    if node.is_infinite?
+      node.count_goal -= 999
+    else
+      node.count_goal -= 1
+    end
+  end
+
+  def get_rep_parent
+    if self.rep_parent.nil?
+      return self
+    else
+      return self.rep_parent
+    end
+  end
 end
