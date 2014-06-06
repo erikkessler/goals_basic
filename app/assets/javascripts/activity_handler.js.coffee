@@ -1,7 +1,20 @@
 # Place all the behaviors and hooks related to the matching controller here.
 # All this logic will automatically be available in application.js.
 # You can use CoffeeScript in this file: http://coffeescript.org/
-$ ->
-        console.log("DOM ready")
-        $("#today").click ->
-                console.log("Today clicked")
+$(document).on "ready page:load", ->
+        $("#task_form").show()
+        $("#task").css("font-weight","Bold")
+        $("#habit_form").hide()
+        $("#habit").css("font-weight","Normal")
+        $("#task").click ->
+                console.log("Task clicked")
+                $("#task_form").show()
+                $("#task").css("font-weight","Bold")
+                $("#habit_form").hide()
+                $("#habit").css("font-weight","Normal")
+        $("#habit").click ->
+                console.log("Habit clicked")
+                $("#task_form").hide()
+                $("#task").css("font-weight","Normal")
+                $("#habit_form").show()
+                $("#habit").css("font-weight","Bold")
