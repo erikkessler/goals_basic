@@ -102,8 +102,8 @@ module MyModules
                                         reward: params[:reward],
                                         penalty: params[:penalty],
                                         period: period,
-                                        count: params[:per_week],
-                                        count_goal: weeks)
+                                        count: params[:per_week])
+        new_activity.set_weeks(weeks)
       end
 
       errors[:new_act] = new_activity
