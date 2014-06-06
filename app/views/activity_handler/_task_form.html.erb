@@ -1,4 +1,4 @@
-<%= form_tag(@path, method: @method, id: 'task_form') do %>
+<%= form_tag(@path, method: @method, id: 'task_form', class: @values[:type_group] == 1 ? 'shown_form' : 'hidden_form') do %>
   <%= label_tag 'name', 'Task Name' %><br>
   <%= text_field_tag 'name', @values[:name] %></br></br>
   <%= label_tag 'description', 'Task Description' %><br>

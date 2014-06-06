@@ -239,7 +239,7 @@ class HabitWeek < Habit
 
   def set_weeks(weeks)
     node = self.get_rep_parent
-    if weeks.nil?
+    if weeks.nil? or weeks == INFINITE_WEEKS
       node.count_goal = (-1 * node.get_weeks_complete) + INFINITE_WEEKS
       node.save!
     else

@@ -160,26 +160,32 @@ class ActivityHandler < ActiveRecord::Base
 
   def get_attributes(params)
     act = Activity.find(params[:id])
-    if act.class == 'FullTask' or act.class == 'PartialTask'
-      return act.attributes.symbolize_keys 
-    elsif act.class == 'Habit'
+    if act.class == FullTask or act.class == PartialTask
+      values = act.attributes.symbolize_keys
+      values[:type_group] = 1
+      return values 
+    elsif act.class == Habit
       values = act.attributes.symbolize_keys 
       values[:habit_type] = 'none'
       values[:repeated] = act.get_repeated.collect { |d| d.to_s }
+      values[:type_group] = 2
       return values
-    elsif act.class == 'HabitNumber'
+    elsif act.class == HabitNumber
       values = act.attributes.symbolize_keys 
       values[:habit_type] = 'number'
       values[:repeated] = act.get_repeated.collect { |d| d.to_s }
       values[:total] = act.count_goal
+      values[:type_group] = 2
       return values
-    elsif act.class == 'HabitWeek'
+    elsif act.class == HabitWeek
       values = act.attributes.symbolize_keys 
       values[:habit_type] = 'week'
       values[:repeated] = act.get_repeated.collect { |d| d.to_s }
       values[:per_week] = act.count
-      if act.count_goal >= 0
-        values[:weeks] = values
+      if !act.is_infinite?
+        values[:weeks] = act.weeks_needed
+      end
+      values[:type_group] = 2
       return values
     end
   end

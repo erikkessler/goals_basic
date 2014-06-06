@@ -1,8 +1,8 @@
 <%= render 'errors' %>
 
 <div id="activity_nav">
-  <div id="task">Task</div>
-  <div id="habit">Habit</div>
+  <div id="task", class=<%= @values[:type_group] == 1 ? "shown_form_title" : "hidden_form_title" %>>Task</div>
+  <div id="habit", class=<%= @values[:type_group] == 2 ? "shown_form_title" : "hidden_form_title" %>>Habit</div>
 </div></br>
 
 <%= render 'task_form' %>

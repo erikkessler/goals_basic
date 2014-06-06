@@ -2,10 +2,10 @@
 # All this logic will automatically be available in application.js.
 # You can use CoffeeScript in this file: http://coffeescript.org/
 $(document).on "ready page:load", ->
-        $("#task_form").show()
-        $("#task").css("font-weight","Bold")
-        $("#habit_form").hide()
-        $("#habit").css("font-weight","Normal")
+        $(".shown_form").show()
+        $(".shown_form_title").css("font-weight","Bold")
+        $(".hidden_form").hide()
+        $(".hidden_form_title").css("font-weight","Normal")
         $("#task").click ->
                 console.log("Task clicked")
                 $("#task_form").show()
