@@ -20,6 +20,7 @@ class ActivityHandler < ActiveRecord::Base
   end
 
   def check_form_errors(params, update = false)
+    params[:habit_type] = 'none'
     act_type = activity_type(params)
     return ActivityHelper.form_errors(act_type, params, update)
   end

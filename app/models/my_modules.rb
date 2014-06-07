@@ -205,7 +205,7 @@ module MyModules
         end
 
         # ensure period valid
-        if !params[:period].empty? and params[:period].to_i <= 0 and !update
+        if !update and !params[:period].empty? and params[:period].to_i <= 0 
           Rails.logger.debug "Period is invalid"
           errors[:period] = "Period must be blank (infinte) or greater than 0"
         end
@@ -224,7 +224,7 @@ module MyModules
         end
 
         # if habit number need a total
-        if type_id == ActivityHandler::HABIT_NUMBER and !update
+        if !update and type_id == ActivityHandler::HABIT_NUMBER
           if params[:total].empty?
             Rails.logger.debug "Need a total number of completions"
             errors[:expiration_date] = "Must specify required number of completions"
@@ -235,7 +235,7 @@ module MyModules
         end
 
         # if habit week need per week 
-        if type_id == ActivityHandler::HABIT_WEEK and !update
+        if !update and type_id == ActivityHandler::HABIT_WEEK
           if params[:per_week].empty?
             Rails.logger.debug "Need a number of completionsper week"
             errors[:expiration_date] = "Must specify required number of completions per week"
