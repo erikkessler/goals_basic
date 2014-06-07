@@ -17,12 +17,16 @@ class ActivityHandlerController < ApplicationController
       redirect_to :action => "today"
     else
       @values = params
+      if @values[:habit_type].nil?
+        @values[:habit_type] = 'none'
+      end
       @activities = handler.get_parentable
       @method = :post
       @path = '/activity_handler'
       render 'new'
     end
   end
+
 
   def show
     @activity = Activity.find(params[:id])
@@ -64,7 +68,7 @@ class ActivityHandlerController < ApplicationController
 
   def update
     handler = ActivityHandler.find(1)
-    @errors = handler.check_form_errors(params)
+    @errors = handler.check_form_errors(params, true)
     if !@errors.empty?
       @values = params
       @activities = handler.get_parentable.where.not(:id => handler.it_and_children(params[:id]))

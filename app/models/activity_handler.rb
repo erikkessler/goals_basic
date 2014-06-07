@@ -19,9 +19,9 @@ class ActivityHandler < ActiveRecord::Base
 
   end
 
-  def check_form_errors(params)
+  def check_form_errors(params, update = false)
     act_type = activity_type(params)
-    return ActivityHelper.form_errors(act_type, params)
+    return ActivityHelper.form_errors(act_type, params, update)
   end
 
   def activity_type(params)
@@ -94,46 +94,58 @@ class ActivityHandler < ActiveRecord::Base
   end
 
   def update_act(params)
-    old_act = Activity.find(prams[:id])
-    old_attributes = old_act.attributes.symbolize_keys
-    new_type = is_diff_type(params, old_act.class)
-    if new_type == false
-      update_act_helper(old_act, params)
-    elsif old_act.class == Habit 
-      or old_act.class == HabitNumber or old_act.class == HabitWeek
-      old_act = old_act.get_rep_parent
-      old_act.repititions.destroy_all
-      change_type_helper(old_act, nil, params)
-    else
-      update_act_helper(old_act, new_type, params)
-    end
+    old_act = Activity.find(params[:id])
+    
+    if old_act.class == FullTask or old_act.class == PartialTask
+      old_act.name = params[:name]
+      old_act.description = params[:description]
+      old_act.show_date = params[:show_date]
+      old_act.expiration_date = params[:expiration_date]
+      old_act.reward = params[:reward]
+      old_act.penalty = params[:penalty]
+      old_act.save!
       
+      parent_id = params[:parent_id].to_i
+      if parent_id != old_act.parent_id and !params[:parent_id].empty?
+            handler = ActivityHandler.find(1)
+            it_and_child = handler.it_and_children(old_act.id)
+            if !it_and_child.include?(parent_id)
+              parent = Activity.find(parent_id)
+              parent.add_child(old_act)
+            end
+      end
+    elsif old_act.class == Habit or old_act.class == HabitNumber or 
+        old_act.class == HabitWeek
+      old_act.name = params[:name]
+      old_act.description = params[:description]
+      old_act.reward = params[:reward]
+      old_act.penalty = params[:penalty]
+      old_act.save!
 
-=begin
-    children = Activity.find(params[:id]).children
-    Activity.find(params[:id]).destroy
-    new_act_id = create_activity(params)[:new_act].id
-    children.each do |child|
-      child.parent_id = new_act_id
-      child.save!
-    end
-=end
-  end
+      gen = false
+      repeated = params[:repeated].collect { |d| d.to_i }
+      if repeated != old_act.get_repeated
+        old_act.del_reps
+        old_act.set_repeated(repeated)
+        gen = true
+      end
 
-  def is_diff_type(params, old_type)
-    new_type = activtiy_type(params)
-    if old_type == FullTask and new_type != FULL_TASK
-      return new_type
-    elsif old_type == PartialTask and new_type != PARTIAL_TASK
-      return new_type
-    elsif old_type == Habit and new_type != HABIT
-      return new_type
-    elsif old_type == HabitNumber and new_type != HABIT_NUMBER
-      return new_type
-    elsif old_type == HabitWeek and new_type != HABIT_WEEK
-      return new_type
-    else
-      return false
+      if old_act.expiration_date != params[:expiration_date]
+        odl_act.del_reps
+        old_act.expiration_date = params[:expiration_date]
+        gen = true
+      end
+
+      old_act.save!
+
+      if gen
+        if old_act.expiration_date.nil?
+          handler = ActivityHandler.find(0)
+          old_act.gen_reps(Date.tomorrow, handler.upto_date)
+        else
+          old_act.gen_reps(Date.tomorrow, old_act.expiration_date)
+        end
+      end
     end
   end
 

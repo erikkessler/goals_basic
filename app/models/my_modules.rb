@@ -129,79 +129,6 @@ module MyModules
 
       return errors
     end
-    
-    def self.update_act_helper(old_act, new_act_type, params)
-      if new_act_type.nil?
-        if old_act.class == FullTask or old_act.class == PartialTask
-          old_act.name = params[:name] 
-          old_act.show_date = params[:show_date] 
-          old_act.description = params[:description]
-          old_act.expiration_date = params[:expiration_date]
-          old_act.reward = params[:reward]
-          old_act.penalty = params[:penalty]
-          
-          set_parent(old_act, params[:parent_id].to_i)
-          
-        elsif old_act.class == Habit 
-          habit_edit(params, old_act)
-
-        elsif old_act.class == HabitNumber
-          habit_edit(params, old_act)
-          old_act.total = params[:total]
-        elsif old_act.class == HabitWeek
-          habit_edit(params, old_act)
-          
-        end
-      end
-    end
-    
-    def habit_edit(params, old_act)
-      
-      old_act.name = params[:name]  
-      old_act.description = params[:description]
-      old_act.expiration_date = params[:expiration_date]
-      old_act.reward = params[:reward]
-      old_act.penalty = params[:penalty]
-      
-      set_parent(old_act, params[:parent_id].to_i)
-
-      gen = false
-      repeated = params[:repeated].collect { |d| d.to_i }
-      if repeated != old_act.get_repeated
-        old_act.del_reps
-        old_act.set_repeated(repeated)
-        gen = true
-      end
-
-      if old_act.expiration_date != params[:expiration_date]
-        odl_act.del_reps
-        old_act.expiration_date = params[:expiration_date]
-        gen = true
-      end
-
-      old_act.save!
-
-      if gen
-        if old_act.expiration_date.nil?
-          handler = ActivityHandler.find(0)
-          old_act.gen_reps(Date.tomorrow, handler.upto_date)
-        else
-          old_act.gen_reps(Date.tomorrow, old_act.expiration_date)
-        end
-
-    end
-
-    def self.set_parent(act, parent_id)
-      if parent_id != act.parent_id
-            handler = ActivityHandler.find(0)
-            it_and_child = handler.it_and_children(act.id)
-            if !it_and_child.include?(parent_id)
-              parent = Activity.find(parent_id
-              parent.add_child(act)
-            end
-          end
-    end
-    
 
     def self.basic_errors(params)
       errors = { }
@@ -225,7 +152,7 @@ module MyModules
       return errors
     end
 
-    def self.form_errors(type_id, params)
+    def self.form_errors(type_id, params, update = false)
       if type_id == ActivityHandler::FULL_TASK or
           type_id == ActivityHandler::PARTIAL_TASK
         errors = basic_errors(params)
@@ -278,7 +205,7 @@ module MyModules
         end
 
         # ensure period valid
-        if !params[:period].empty? and params[:period].to_i <= 0
+        if !params[:period].empty? and params[:period].to_i <= 0 and !update
           Rails.logger.debug "Period is invalid"
           errors[:period] = "Period must be blank (infinte) or greater than 0"
         end
@@ -297,7 +224,7 @@ module MyModules
         end
 
         # if habit number need a total
-        if type_id == ActivityHandler::HABIT_NUMBER
+        if type_id == ActivityHandler::HABIT_NUMBER and !update
           if params[:total].empty?
             Rails.logger.debug "Need a total number of completions"
             errors[:expiration_date] = "Must specify required number of completions"
@@ -308,7 +235,7 @@ module MyModules
         end
 
         # if habit week need per week 
-        if type_id == ActivityHandler::HABIT_WEEK
+        if type_id == ActivityHandler::HABIT_WEEK and !update
           if params[:per_week].empty?
             Rails.logger.debug "Need a number of completionsper week"
             errors[:expiration_date] = "Must specify required number of completions per week"

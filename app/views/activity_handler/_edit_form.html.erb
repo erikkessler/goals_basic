@@ -1,0 +1,10 @@
+<%= render 'errors' %>
+
+<div id="activity_nav">
+  <div class=<%= @values[:type_group].to_i == 1 ? "shown_form" : "hidden_form" %>>Task</div>
+  <div class=<%= @values[:type_group].to_i == 2 ? "shown_form" : "hidden_form" %>>Habit</div>
+</div></br>
+
+<%= render 'task_edit_form' %>
+
+<%= render 'habit_edit_form' %>

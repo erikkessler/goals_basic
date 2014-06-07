@@ -11,8 +11,6 @@
   <%= number_field_tag 'reward', @values[:reward], min: 0 %></br></br>
   <%= label_tag 'penalty', 'Penalty' %><br>
   <%= number_field_tag 'penalty', @values[:penalty], min: 0 %></br></br>
-  <%= check_box_tag 'internal', "1", @values[:internal] == "1" %>
-  <%= label_tag 'internal', 'Task is complete if children are' %><br></br>
   <%= label_tag 'parent_id', 'Task\'s Parent' %></br>
   <%= select_tag 'parent_id', 
       options_from_collection_for_select(@activities,"id", "name",
@@ -22,4 +20,3 @@
   <%= submit_tag "Save Task" %>
   <%= link_to "Cancel", today_path %>
 <% end %>
-
