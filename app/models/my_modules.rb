@@ -51,7 +51,7 @@ module MyModules
       errors[:new_act] = new_activity
 
       # if it has a parent, add activity to it
-      parent_id = params[:parent_id]
+      parent_id = params[:parent_id].to_i
       if !parent_id.empty? and parent_id != new_activity.id
         parent = Activity.find(parent_id)
         parent.add_child(new_activity)
@@ -109,7 +109,7 @@ module MyModules
       errors[:new_act] = new_activity
 
       # if it has a parent, add activity to it
-      parent_id = params[:parent_id]
+      parent_id = params[:parent_id].to_i
       if !parent_id.empty? and parent_id != new_activity.id
         parent = Activity.find(parent_id)
         parent.add_child(new_activity)
@@ -130,6 +130,79 @@ module MyModules
       return errors
     end
     
+    def self.update_act_helper(old_act, new_act_type, params)
+      if new_act_type.nil?
+        if old_act.class == FullTask or old_act.class == PartialTask
+          old_act.name = params[:name] 
+          old_act.show_date = params[:show_date] 
+          old_act.description = params[:description]
+          old_act.expiration_date = params[:expiration_date]
+          old_act.reward = params[:reward]
+          old_act.penalty = params[:penalty]
+          
+          set_parent(old_act, params[:parent_id].to_i)
+          
+        elsif old_act.class == Habit 
+          habit_edit(params, old_act)
+
+        elsif old_act.class == HabitNumber
+          habit_edit(params, old_act)
+          old_act.total = params[:total]
+        elsif old_act.class == HabitWeek
+          habit_edit(params, old_act)
+          
+        end
+      end
+    end
+    
+    def habit_edit(params, old_act)
+      
+      old_act.name = params[:name]  
+      old_act.description = params[:description]
+      old_act.expiration_date = params[:expiration_date]
+      old_act.reward = params[:reward]
+      old_act.penalty = params[:penalty]
+      
+      set_parent(old_act, params[:parent_id].to_i)
+
+      gen = false
+      repeated = params[:repeated].collect { |d| d.to_i }
+      if repeated != old_act.get_repeated
+        old_act.del_reps
+        old_act.set_repeated(repeated)
+        gen = true
+      end
+
+      if old_act.expiration_date != params[:expiration_date]
+        odl_act.del_reps
+        old_act.expiration_date = params[:expiration_date]
+        gen = true
+      end
+
+      old_act.save!
+
+      if gen
+        if old_act.expiration_date.nil?
+          handler = ActivityHandler.find(0)
+          old_act.gen_reps(Date.tomorrow, handler.upto_date)
+        else
+          old_act.gen_reps(Date.tomorrow, old_act.expiration_date)
+        end
+
+    end
+
+    def self.set_parent(act, parent_id)
+      if parent_id != act.parent_id
+            handler = ActivityHandler.find(0)
+            it_and_child = handler.it_and_children(act.id)
+            if !it_and_child.include?(parent_id)
+              parent = Activity.find(parent_id
+              parent.add_child(act)
+            end
+          end
+    end
+    
+
     def self.basic_errors(params)
       errors = { }
       
