@@ -1,6 +1,6 @@
 <h1>Overview</h1>
 <% def self.print_act(act) %>
-<li><%= act.name %></li>
+<li><%= link_to link_to act.name, controller: "activity_handler", action: "show", id: act.id %></li>
 <ul>
 <% act.children.each do |child|
     print_act(child)
