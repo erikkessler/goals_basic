@@ -52,7 +52,7 @@ module MyModules
 
       # if it has a parent, add activity to it
       parent_id = params[:parent_id].to_i
-      if !parent_id.empty? and parent_id != new_activity.id
+      if !params[:parent_id].empty? and parent_id != new_activity.id
         parent = Activity.find(parent_id)
         parent.add_child(new_activity)
       end
@@ -110,7 +110,7 @@ module MyModules
 
       # if it has a parent, add activity to it
       parent_id = params[:parent_id].to_i
-      if !parent_id.empty? and parent_id != new_activity.id
+      if !params[:parent_id].empty? and parent_id != new_activity.id
         parent = Activity.find(parent_id)
         parent.add_child(new_activity)
       end

@@ -1,3 +1,4 @@
+<%= @values[:is_rp] ? "Editing all repititions" : "All changes except show date and expire date will apply to all repititions" %></br></br>
 <%= form_tag(@path, method: @method, id: 'habit_form', class: @values[:type_group].to_i == 2 ? 'shown_form' : 'hidden_form') do %>
   <%= label_tag 'name', 'Habit Name' %><br>
   <%= text_field_tag 'name', @values[:name] %></br></br>
@@ -12,6 +13,10 @@
     <%= check_box_tag 'repeated[]', i, @values[:repeated].include?(i.to_s) %>
     <%= label_tag 'repeated[]', d %>
   <% end %></br></br>
+  <% if !@values[:is_rp] %>
+    <%= label_tag 'show_date', 'Date to Show This Repitition' %></br>
+    <%= date_field_tag 'show_date', @values[:show_date] %></br></br>
+  <% end %>
   <%= label_tag 'expiration_date', 'Date Habit Expires' %></br>
   <%= date_field_tag 'expiration_date', @values[:expiration_date] %></br></br>
   <%= label_tag 'reward', 'Reward' %><br>

@@ -64,7 +64,9 @@ class ActivityHandler < ActiveRecord::Base
   def it_and_children(id)
     it_children = [ ] 
     it_children << (id)
-    Activity.find(id).children.each{ |child| it_children << it_and_children(child.id) }
+    act = Activity.find(id)
+    act.children.each{ |child| it_children << it_and_children(child.id) }
+    act.rep_parent_id.nil? ? nil : it_children << act.rep_parent_id
     return it_children
   end
 
@@ -107,7 +109,7 @@ class ActivityHandler < ActiveRecord::Base
       old_act.save!
       
       parent_id = params[:parent_id].to_i
-      if parent_id != old_act.parent_id and !params[:parent_id].empty?
+      if !params[:parent_id].empty? and parent_id != old_act.parent_id
             handler = ActivityHandler.find(1)
             it_and_child = handler.it_and_children(old_act.id)
             if !it_and_child.include?(parent_id)
@@ -117,8 +119,29 @@ class ActivityHandler < ActiveRecord::Base
       end
     elsif old_act.class == Habit or old_act.class == HabitNumber or 
         old_act.class == HabitWeek
+      
+      expire = true
+
+      if !old_act.nil?
+        old_act.show_date = params[:show_date]
+        old_act.expiration_date = params[:expiration_date]
+        old_act.save!
+        old_act = old_act.rep_parent
+        expire = false
+      end
+
+
       old_act.name = params[:name]
       old_act.description = params[:description]
+      
+      old_act.repititions.each do |rep|
+        rep.name = params[:name]
+        rep.description = params[:description]
+        rep.reward = params[:reward]
+        rep.penalty = params[:penalty]
+        rep.save!
+      end
+
       old_act.reward = params[:reward]
       old_act.penalty = params[:penalty]
       old_act.save!
@@ -131,14 +154,14 @@ class ActivityHandler < ActiveRecord::Base
         gen = true
       end
 
-      if old_act.expiration_date != params[:expiration_date]
-        odl_act.del_reps
+      if expire and old_act.expiration_date != params[:expiration_date]
+        old_act.del_reps
         old_act.expiration_date = params[:expiration_date]
         gen = true
       end
 
       old_act.save!
-
+      
       if gen
         if old_act.expiration_date.nil?
           handler = ActivityHandler.find(0)
@@ -146,6 +169,18 @@ class ActivityHandler < ActiveRecord::Base
         else
           old_act.gen_reps(Date.tomorrow, old_act.expiration_date)
         end
+      end
+
+      parent_id = params[:parent_id].to_i
+      if params[:parent_id].empty? 
+        old_act.make_root
+      elsif parent_id != old_act.parent_id
+            handler = ActivityHandler.find(1)
+            it_and_child = handler.it_and_children(old_act.id)
+            if !it_and_child.include?(parent_id)
+              parent = Activity.find(parent_id)
+              parent.add_child(old_act)
+            end
       end
     end
   end
@@ -196,6 +231,12 @@ class ActivityHandler < ActiveRecord::Base
       values[:habit_type] = 'none'
       values[:repeated] = act.get_repeated.collect { |d| d.to_s }
       values[:type_group] = 2
+      if act.rep_parent.nil?
+        values[:is_rp] = true
+      else
+        values[:is_rp] = false
+        values[:parent_id] = act.rep_parent.parent_id
+      end
       return values
     elsif act.class == HabitNumber
       values = act.attributes.symbolize_keys 
@@ -203,12 +244,24 @@ class ActivityHandler < ActiveRecord::Base
       values[:repeated] = act.get_repeated.collect { |d| d.to_s }
       values[:total] = act.count_goal
       values[:type_group] = 2
+      if act.rep_parent.nil?
+        values[:is_rp] = true
+      else
+        values[:is_rp] = false
+        values[:parent_id] = act.rep_parent.parent_id
+      end
       return values
     elsif act.class == HabitWeek
       values = act.attributes.symbolize_keys 
       values[:habit_type] = 'week'
       values[:repeated] = act.get_repeated.collect { |d| d.to_s }
       values[:per_week] = act.count
+      if act.rep_parent.nil?
+        values[:is_rp] = true
+      else
+        values[:is_rp] = false
+        values[:parent_id] = act.rep_parent.parent_id
+      end
       if !act.is_infinite?
         values[:weeks] = act.weeks_needed
       end
