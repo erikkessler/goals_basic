@@ -280,5 +280,8 @@ class ActivityHandler < ActiveRecord::Base
     end
   end
 
-  
+  def get_week_reward(act, date, start = :monday)
+    return act.week_payout(date, start)
+
+  end
 end

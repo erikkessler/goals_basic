@@ -1,5 +1,5 @@
-<%= @values[:is_rp] ? "Editing all repititions" : "All changes except show date and expire date will apply to all repititions" %></br></br>
 <%= form_tag(@path, method: @method, id: 'habit_form', class: @values[:type_group].to_i == 2 ? 'shown_form' : 'hidden_form') do %>
+  <%= @values[:is_rp] ? "Editing all repititions" : "All changes except show date and expire date will apply to all repititions" %></br></br>
   <%= label_tag 'name', 'Habit Name' %><br>
   <%= text_field_tag 'name', @values[:name] %></br></br>
   <%= label_tag 'description', 'Habit Description' %><br>

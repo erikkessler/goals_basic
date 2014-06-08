@@ -38,6 +38,8 @@ class ActivityHandlerController < ApplicationController
     @complete = today[:complete]
     @incomplete = today[:incomplete]
     @overdue = today[:overdue]
+    @week_payout = 0
+    handler.roots(true).each {|act| @week_payout += handler.get_week_reward(act, Date.current) }
 
   end
 

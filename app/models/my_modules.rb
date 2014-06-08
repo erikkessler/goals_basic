@@ -180,9 +180,10 @@ module MyModules
         # make sure expiration date after show date
         if !params[:expiration_date].empty? 
           begin
-            (Date.parse(params[:expiration_date]) < Date.parse(params[:show_date]))
-            Rails.logger.debug "Expiration date before show"
-            errors[:expiration_date] = "Expiration date can't be before date of task"
+            if (Date.parse(params[:expiration_date]) < Date.parse(params[:show_date]))
+              Rails.logger.debug "Expiration date before show"
+              errors[:expiration_date] = "Expiration date can't be before date of task"
+            end
           rescue
             Rails.logger.debug "Invalid expiration_date format"
             errors[:expiration_date] = "Invalid date for expiration date"

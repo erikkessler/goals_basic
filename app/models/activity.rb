@@ -172,7 +172,7 @@ class Activity < ActiveRecord::Base
     if (self.state == COMPLETE and date_range.include? self.completed_date.to_date)
       act_payout = self.reward # completed this week
       
-    elsif (self.state == EXPIRED and date_range.include? self.expiration_date.to_date)
+    elsif (self.state == EXPIRED and date_range.include? self.expiration_date)
       act_payout = -1 * self.penalty # expired this week
     end
 

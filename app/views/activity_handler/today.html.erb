@@ -1,3 +1,4 @@
+<p>You have earned $<%= @week_payout.to_s %> this week</p>
 <h1>Today's Activities</h1> 
 <%= link_to "add activity", new_activity_handler_path %><br>
 <% if !@overdue.empty? %>
