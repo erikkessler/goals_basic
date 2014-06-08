@@ -122,7 +122,7 @@ class ActivityHandler < ActiveRecord::Base
       
       expire = true
 
-      if !old_act.nil?
+      if !old_act.rep_parent.nil?
         old_act.show_date = params[:show_date]
         old_act.expiration_date = params[:expiration_date]
         old_act.save!
@@ -164,7 +164,7 @@ class ActivityHandler < ActiveRecord::Base
       
       if gen
         if old_act.expiration_date.nil?
-          handler = ActivityHandler.find(0)
+          handler = ActivityHandler.find(1)
           old_act.gen_reps(Date.tomorrow, handler.upto_date)
         else
           old_act.gen_reps(Date.tomorrow, old_act.expiration_date)

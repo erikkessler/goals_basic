@@ -21,7 +21,7 @@ class Habit < Repeatable
     # select rep_parent if it exists
     node = self
     if !self.rep_parent.nil?
-      node = self.rep_parent
+      return self.destroy
     end
 
     # outdent children in case remove_act doesn't delete
