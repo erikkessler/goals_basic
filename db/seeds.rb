@@ -40,6 +40,6 @@ goal_group.types << goals
 
 # handler
 if ActivityHandler.all.size == 0
-  ActivityHandler.create
+  ActivityHandler.create(reset_date: Date.new(2014,6,22), upto_date: Date.new(2014,7,6))
 end
 

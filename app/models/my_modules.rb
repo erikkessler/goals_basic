@@ -116,7 +116,7 @@ module MyModules
       end
 
       repeated = params[:repeated]
-      repeated = repeated.collect { |i| i.to_i }
+      repeated = repeated.keys.to_a.collect { |i| i.to_i }
       new_activity.set_repeated(repeated)
       new_activity.reload
       

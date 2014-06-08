@@ -147,7 +147,7 @@ class ActivityHandler < ActiveRecord::Base
       old_act.save!
 
       gen = false
-      repeated = params[:repeated].collect { |d| d.to_i }
+      repeated = params[:repeated].keys.to_a.collect { |d| d.to_i }
       if repeated != old_act.get_repeated
         old_act.del_reps
         old_act.set_repeated(repeated)
@@ -233,7 +233,9 @@ class ActivityHandler < ActiveRecord::Base
     elsif act.class == Habit
       values = act.attributes.symbolize_keys 
       values[:habit_type] = 'none'
-      values[:repeated] = act.get_repeated.collect { |d| d.to_s }
+      repeated = {}
+      act.get_repeated.each { |d| repeated[d.to_s] = d.to_s }
+      values[:repeated] = repeated
       values[:type_group] = 2
       if act.rep_parent.nil?
         values[:is_rp] = true
@@ -245,7 +247,9 @@ class ActivityHandler < ActiveRecord::Base
     elsif act.class == HabitNumber
       values = act.attributes.symbolize_keys 
       values[:habit_type] = 'number'
-      values[:repeated] = act.get_repeated.collect { |d| d.to_s }
+      repeated = {}
+      act.get_repeated.each { |d| repeated[d.to_s] = d.to_s }
+      values[:repeated] = repeated
       values[:total] = act.count_goal
       values[:type_group] = 2
       if act.rep_parent.nil?
@@ -258,7 +262,9 @@ class ActivityHandler < ActiveRecord::Base
     elsif act.class == HabitWeek
       values = act.attributes.symbolize_keys 
       values[:habit_type] = 'week'
-      values[:repeated] = act.get_repeated.collect { |d| d.to_s }
+      repeated = {}
+      act.get_repeated.each { |d| repeated[d.to_s] = d.to_s }
+      values[:repeated] = repeated
       values[:per_week] = act.count
       if act.rep_parent.nil?
         values[:is_rp] = true

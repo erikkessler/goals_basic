@@ -9,8 +9,8 @@
      end
      days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
      days.map.with_index do |d, i| %>
-    <%= check_box_tag 'repeated[]', i, @values[:repeated].include?(i.to_s) %>
-    <%= label_tag 'repeated[]', d %>
+    <%= check_box_tag "repeated[#{i}]", i, @values[:repeated].include?(i.to_s) %>
+    <%= label_tag "repeated[#{i}]", d %>
   <% end %></br></br>
   <%= label_tag 'habit_type', "Required Completions to Get Reward" %></br>
   <%= radio_button_tag 'habit_type', 'number', @values[:habit_type] == "number" %>

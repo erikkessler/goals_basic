@@ -35,6 +35,7 @@ class Habit < Repeatable
     
     node.del_reps
     node.state = Activity::ARCHIVED_HABIT
+    node.save!
 
     if !old_parent.nil?
       old_parent.is_complete?
