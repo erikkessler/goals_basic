@@ -196,7 +196,11 @@ class ActivityHandler < ActiveRecord::Base
     if date == "this_week"
       date = Date.current
     else
-      date = Date.parse(date)
+      begin
+        date = Date.parse(date)
+      rescue
+        date = Date.current
+      end
     end
 
     first_date = date.

@@ -1,4 +1,6 @@
 <h1>Week Overview</h1>
+<h2><%= link_to "<", :date => @days.keys[0].advance(:weeks => -1) %>
+ Week of <%= @days.keys[0] %> <%= link_to ">", :date => @days.keys[0].advance(:weeks => 1) %></h2>
 <% @days.each do |day, acts| %>
   <h3><%= day.to_s %></h3>
   <ul>
