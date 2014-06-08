@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140605230217) do
+ActiveRecord::Schema.define(version: 20140608184525) do
 
   create_table "activities", force: true do |t|
     t.integer  "repeated"
@@ -65,5 +65,17 @@ ActiveRecord::Schema.define(version: 20140605230217) do
   end
 
   add_index "types", ["type_group_id"], name: "index_types_on_type_group_id"
+
+  create_table "users", force: true do |t|
+    t.string   "email"
+    t.string   "password_hash"
+    t.string   "password_salt"
+    t.string   "remember_token"
+    t.boolean  "admin"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+  end
+
+  add_index "users", ["remember_token"], name: "index_users_on_remember_token"
 
 end
