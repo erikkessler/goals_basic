@@ -279,4 +279,6 @@ class ActivityHandler < ActiveRecord::Base
       return values
     end
   end
+
+  
 end
