@@ -70,7 +70,7 @@ class ActivityHandlerController < ApplicationController
       @overdue = today[:overdue]
       # get the weekly payout
       @week_payout = 0
-      handler.roots(true).each {|act| @week_payout += handler.get_week_reward(act, Date.current, current_user) }
+      handler.roots(true, current_user).each {|act| @week_payout += handler.get_week_reward(act, Date.current) }
     else
       store_location
       redirect_to log_in_path, :notice => "Sign in required."

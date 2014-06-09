@@ -25,7 +25,7 @@ module MyModules
     end
 
     # Creates a new task of the given type
-    def self.task_creator(type_id, params)
+    def self.task_creator(type_id, params, current_user)
       errors = form_errors(type_id, params) # get any errors
 
       # return the errors if there are any
@@ -142,8 +142,8 @@ module MyModules
       end
 
       # add the habit and all reps to the user
-      current_children.activities << new_activity
-      new_activity.repititions.each {|rep| current_children.activities << rep }
+      current_user.activities << new_activity
+      new_activity.repititions.each {|rep| current_user.activities << rep }
 
       return errors
     end

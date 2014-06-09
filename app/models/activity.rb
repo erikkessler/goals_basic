@@ -156,8 +156,7 @@ class Activity < ActiveRecord::Base
     end
 
     # calculate range of dates for the week
-    week_start = date.beginning_of_week(start_date = start_day
-.to_sym)
+    week_start = date.beginning_of_week(start_date = start_day.to_sym)
     week_end =  date.end_of_week(start_date = start_day.to_sym)
     date_range = week_start..week_end
 

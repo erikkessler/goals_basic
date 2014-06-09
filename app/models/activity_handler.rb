@@ -1,7 +1,7 @@
 # This class bridges the Activity framework to the user. Each user has one activity handler.
 
 class ActivityHandler < ActiveRecord::Base
-  include MyModules, SessionsHelper
+  include MyModules
 
   # Constants that define type_id
   FULL_TASK = 0
@@ -250,7 +250,7 @@ class ActivityHandler < ActiveRecord::Base
 
   # Returns activities that are root. The all parameter determines whether to get all or just,
   # incomplete/overdue.
-  def roots(all = false)
+  def roots(all = false, current_user)
     if all
       return current_user.activities.where("rep_parent_id is ? AND is_root is ?", nil, true)
     else 
