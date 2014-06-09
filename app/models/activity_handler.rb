@@ -13,6 +13,11 @@ class ActivityHandler < ActiveRecord::Base
   PROGRESS_SUM = 6
   PROGRESS_AVG = 7
   PROGRESS_MAX = 8
+  
+  # Returns the activity specified by id
+  def find_act(id, current_user)
+    return current_user.activities.find(id)
+  end
 
   # Uses the module to create the activity
   def create_activity(params, current_user)
