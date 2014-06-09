@@ -1,8 +1,9 @@
-# This class bridges the Activity framework to the user
+# This class bridges the Activity framework to the user. Each user has one activity handler.
 
 class ActivityHandler < ActiveRecord::Base
   include MyModules, SessionsHelper
 
+  # Constants that define type_id
   FULL_TASK = 0
   PARTIAL_TASK = 1
   HABIT = 2
@@ -13,19 +14,21 @@ class ActivityHandler < ActiveRecord::Base
   PROGRESS_AVG = 7
   PROGRESS_MAX = 8
 
-  
-  def create_activity(params)
-    act_type = activity_type(params)
-    return ActivityHelper.create_activity(act_type, params)
+  # Uses the module to create the activity
+  def create_activity(params, current_user)
+    act_type = activity_type(params) # gets what type of activity it is
+    return ActivityHelper.create_activity(act_type, params, current_user)
 
   end
 
+  # Uses the module to check for errors
   def check_form_errors(params, update = false)
     params[:habit_type] = 'none'
     act_type = activity_type(params)
     return ActivityHelper.form_errors(act_type, params, update)
   end
 
+  # Determines what type of activity it should be based on the params
   def activity_type(params)
     type_group_id = params[:type_group]
     case TypeGroup.find(type_group_id).name
@@ -57,12 +60,15 @@ class ActivityHandler < ActiveRecord::Base
     end
   end
 
-  def get_parentable
+  # Gets activities that can be parents - incomplete or overdue
+  def get_parentable(current_user)
     return current_user.activities.where("(state is ? OR state is ?) AND rep_parent_id is ?",
                                  Activity::INCOMPLETE, Activity::OVERDUE, nil)
   end
 
-  def it_and_children(id)
+  # Takes an id and returns an array of activity ids that are the id or are children.
+  # This is to ensure, when editing, an activity isn't its own parent
+  def it_and_children(id, current_user)
     it_children = [ ] 
     it_children << (id)
     act = current_user.activities.find(id)
@@ -71,7 +77,9 @@ class ActivityHandler < ActiveRecord::Base
     return it_children
   end
 
-  def toggle(id)
+  # Toggles the state of the activity. If it is complete, calls incomplete, if incomplete or
+  # overdue calls complete
+  def toggle(id, current_user)
     activity = current_user.activities.find(id)
     state = activity.state
     if state == Activity::COMPLETE
@@ -83,7 +91,8 @@ class ActivityHandler < ActiveRecord::Base
     end
   end
 
-  def get_today
+  # Gets activities that should be shown today - complete, incomplete, and overdue
+  def get_today(current_user)
     today = { }
     today[:complete] = current_user.activities.
       where("state is ? AND show_date is ?", 
@@ -97,10 +106,13 @@ class ActivityHandler < ActiveRecord::Base
     return today
   end
 
-  def update_act(params)
+  # Updates the activity based on what type it is
+  def update_act(params, current_user)
     old_act = current_user.activities.find(params[:id])
     
+    # tasks
     if old_act.class == FullTask or old_act.class == PartialTask
+      # set the name, desc, show_date, expiration_date, reward, and penalty
       old_act.name = params[:name]
       old_act.description = params[:description]
       old_act.show_date = params[:show_date]
@@ -109,6 +121,7 @@ class ActivityHandler < ActiveRecord::Base
       old_act.penalty = params[:penalty]
       old_act.save!
       
+      # if parent changed, makes sure it a valid change and change it
       parent_id = params[:parent_id].to_i
       if !params[:parent_id].empty? and parent_id != old_act.parent_id
             handler = current_user.activity_handler
@@ -118,11 +131,13 @@ class ActivityHandler < ActiveRecord::Base
               parent.add_child(old_act)
             end
       end
+
+    # habits
     elsif old_act.class == Habit or old_act.class == HabitNumber or 
         old_act.class == HabitWeek
       
+      # if not a rep_parent then don't need to change expiration_date of the whole habit
       expire = true
-
       if !old_act.rep_parent.nil?
         old_act.show_date = params[:show_date]
         old_act.expiration_date = params[:expiration_date]
@@ -132,9 +147,14 @@ class ActivityHandler < ActiveRecord::Base
       end
 
 
+      # change the name, desc, reward, penalty
       old_act.name = params[:name]
       old_act.description = params[:description]
+      old_act.reward = params[:reward]
+      old_act.penalty = params[:penalty]
+      old_act.save!
       
+      # change it for the reps as well
       old_act.repititions.each do |rep|
         rep.name = params[:name]
         rep.description = params[:description]
@@ -143,10 +163,8 @@ class ActivityHandler < ActiveRecord::Base
         rep.save!
       end
 
-      old_act.reward = params[:reward]
-      old_act.penalty = params[:penalty]
-      old_act.save!
-
+      
+      # if repeated changed, delete future reps and create new ones
       gen = false
       repeated = params[:repeated].keys.to_a.collect { |d| d.to_i }
       if repeated != old_act.get_repeated
@@ -155,6 +173,7 @@ class ActivityHandler < ActiveRecord::Base
         gen = true
       end
 
+      # if expiration date changed, delete future reps
       if expire and old_act.expiration_date != params[:expiration_date]
         old_act.del_reps
         old_act.expiration_date = params[:expiration_date]
@@ -163,15 +182,19 @@ class ActivityHandler < ActiveRecord::Base
 
       old_act.save!
       
+      # generate new reps if needed
       if gen
         if old_act.expiration_date.nil?
-          handler = ActivityHandler.find(1)
+          handler = current_user.activity_handler
           old_act.gen_reps(Date.tomorrow, handler.upto_date)
         else
           old_act.gen_reps(Date.tomorrow, old_act.expiration_date)
         end
+        old_act.reload
+        old_act.repititions.each { |rep| current_user.activities << rep }
       end
-
+      
+      # if parent changed, make sure it valid and change it
       parent_id = params[:parent_id].to_i
       if params[:parent_id].empty? 
         old_act.make_root
@@ -186,13 +209,15 @@ class ActivityHandler < ActiveRecord::Base
     end
   end
 
-  def remove_act(id)
+  # calls remove_act on the activity
+  def remove_act(id, current_user)
     activity = current_user.activities.find(id)
     activity.remove_act
     return "Removed #{activity.name}!"
   end
 
-  def week(date, week_begin)
+  # gets the activities that are assigned for each day of the week
+  def week(date, week_begin, current_user)
     days = {}
     if date == "this_week"
       date = Date.current
@@ -204,9 +229,11 @@ class ActivityHandler < ActiveRecord::Base
       end
     end
 
+    # get the beginning of the week
     first_date = date.
       beginning_of_week(start_date = week_begin)
 
+    # go through each day of the week and get the activities
     for i in 0..6
       add_date= first_date.advance(:days => i)
       acts = current_user.activities.where(:show_date => add_date)
@@ -216,6 +243,8 @@ class ActivityHandler < ActiveRecord::Base
     return days
   end
 
+  # Returns activities that are root. The all parameter determines whether to get all or just,
+  # incomplete/overdue.
   def roots(all = false)
     if all
       return current_user.activities.where("rep_parent_id is ? AND is_root is ?", nil, true)
@@ -225,19 +254,28 @@ class ActivityHandler < ActiveRecord::Base
     end
   end
 
-  def get_attributes(params)
-    act = current_user.activities.find(params[:id])
+  # Gets the attributes of a certain activity and puts them in a format that allows the 
+  # forms to preset their data when editing an activity
+  def get_attributes(params, current_user)
+    act = current_user.activities.find(params[:id]) # get the activity
+
+    # Check what type it is
     if act.class == FullTask or act.class == PartialTask
-      values = act.attributes.symbolize_keys
+      values = act.attributes.symbolize_keys # make the stings symbols
       values[:type_group] = 1
       return values 
+
     elsif act.class == Habit
       values = act.attributes.symbolize_keys 
-      values[:habit_type] = 'none'
+      values[:habit_type] = 'none' # set the habit type
+      
+      # get the repeated values
       repeated = {}
       act.get_repeated.each { |d| repeated[d.to_s] = d.to_s }
       values[:repeated] = repeated
       values[:type_group] = 2
+
+      # check if dealing with a repitition of the rep_parent
       if act.rep_parent.nil?
         values[:is_rp] = true
       else
@@ -245,14 +283,19 @@ class ActivityHandler < ActiveRecord::Base
         values[:parent_id] = act.rep_parent.parent_id
       end
       return values
+
     elsif act.class == HabitNumber
       values = act.attributes.symbolize_keys 
       values[:habit_type] = 'number'
+
+      # get the repeated values
       repeated = {}
       act.get_repeated.each { |d| repeated[d.to_s] = d.to_s }
       values[:repeated] = repeated
       values[:total] = act.count_goal
       values[:type_group] = 2
+
+      # check if dealing with a repitition of the rep_parent
       if act.rep_parent.nil?
         values[:is_rp] = true
       else
@@ -260,12 +303,16 @@ class ActivityHandler < ActiveRecord::Base
         values[:parent_id] = act.rep_parent.parent_id
       end
       return values
+
     elsif act.class == HabitWeek
       values = act.attributes.symbolize_keys 
       values[:habit_type] = 'week'
+
       repeated = {}
       act.get_repeated.each { |d| repeated[d.to_s] = d.to_s }
       values[:repeated] = repeated
+      values[:type_group] = 2
+
       values[:per_week] = act.count
       if act.rep_parent.nil?
         values[:is_rp] = true
@@ -276,11 +323,12 @@ class ActivityHandler < ActiveRecord::Base
       if !act.is_infinite?
         values[:weeks] = act.weeks_needed
       end
-      values[:type_group] = 2
+      
       return values
     end
   end
 
+  # Gets the payout for the week of a certain activity
   def get_week_reward(act, date, start = :monday)
     return act.week_payout(date, start)
 

@@ -2,35 +2,37 @@ module MyModules
   
   # This module hold methods for the ActivityHelper to use
   module ActivityHelper
-    include SessionsHelper
     
     # Creates an acitvity of the correct type
-    def self.create_activity(type_id, params)
+    def self.create_activity(type_id, params, current_user)
       # switch on type_id
       case type_id
 
       when ActivityHandler::FULL_TASK 
-        return task_creator(type_id, params)
+        return task_creator(type_id, params, current_user)
       when ActivityHandler::PARTIAL_TASK
-        return task_creator(type_id, params)
+        return task_creator(type_id, params, current_user)
       when ActivityHandler::HABIT
-        return habit_creator(type_id, params)
+        return habit_creator(type_id, params, current_user)
       when ActivityHandler::HABIT_NUMBER
-        return habit_creator(type_id, params)
+        return habit_creator(type_id, params, current_user)
       when ActivityHandler::HABIT_WEEK
-        return habit_creator(type_id, params)
+        return habit_creator(type_id, params, current_user)
       else
         Rails.logger.debug "Invalid type_id"
         return { :type_id => "invalid type_id" }
       end
     end
 
+    # Creates a new task of the given type
     def self.task_creator(type_id, params)
-      errors = form_errors(type_id, params)
+      errors = form_errors(type_id, params) # get any errors
 
+      # return the errors if there are any
       if !errors.empty?
         return errors
       end
+
       # create the new task
       new_activity = nil
       if type_id == ActivityHandler::FULL_TASK
@@ -58,26 +60,32 @@ module MyModules
         parent.add_child(new_activity)
       end
 
+      # add activity to the user
       current_user.activities << new_activity
 
       return errors
 
     end
 
-    def self.habit_creator(type_id, params)
-      errors = form_errors(type_id, params)
+    # Creates a habit of the given type
+    def self.habit_creator(type_id, params, current_user)
+      errors = form_errors(type_id, params) # get any errors
       
+      # return the errors if there are any
       if !errors.empty?
         return errors
       end
       
-      new_activity = nil
+      # determine what the period is
       period = params[:period]
       if period.empty?
         period = Repeatable::NO_EXPIRATION
       else
         period = period.to_i
       end
+
+      # create the new habit
+      new_activity = nil
       if type_id == ActivityHandler::HABIT
         new_activity = Habit.create(name: params[:name],
                                     description: params[:description],
@@ -118,24 +126,30 @@ module MyModules
         parent.add_child(new_activity)
       end
 
+      # set repeated
       repeated = params[:repeated]
       repeated = repeated.keys.to_a.collect { |i| i.to_i }
       new_activity.set_repeated(repeated)
       new_activity.reload
       
+      # generate reps based on the expiration date. Is no expiration date gen upto the
+      # date defined in the ActivityHandler
       if params[:expiration_date].empty?
-        handler = ActivityHandler.find(1)
+        handler = current_user.activity_handler
         new_activity.gen_reps(Date.current, handler.upto_date, period)
       else
         new_activity.gen_reps(Date.current, Date.parse(params[:expiration_date]), period)
       end
 
+      # add the habit and all reps to the user
       current_children.activities << new_activity
       new_activity.repititions.each {|rep| current_children.activities << rep }
 
       return errors
     end
 
+
+    # Basic errors shared by all activities - name, reward, penalty
     def self.basic_errors(params)
       errors = { }
       
@@ -158,10 +172,13 @@ module MyModules
       return errors
     end
 
+    # Returns the errors based on the type of activity
+    # Update just specifies for the habits if certain things need to be checked
     def self.form_errors(type_id, params, update = false)
+      # tasks
       if type_id == ActivityHandler::FULL_TASK or
-          type_id == ActivityHandler::PARTIAL_TASK
-        errors = basic_errors(params)
+          type_id == ActivityHandler::PARTIAL_TASK 
+        errors = basic_errors(params) # get basic errors
 
         
         # ensure it has a show_date
@@ -200,10 +217,11 @@ module MyModules
 
         return errors
 
+      # habits
       elsif type_id == ActivityHandler::HABIT or
           type_id == ActivityHandler::HABIT_NUMBER or
           type_id == ActivityHandler::HABIT_WEEK
-        errors = basic_errors(params)
+        errors = basic_errors(params) # get basic errors
 
         # ensure at least one repeated day
         if params[:repeated].nil?
@@ -230,7 +248,7 @@ module MyModules
           end
         end
 
-        # if habit number need a total
+        # if HabitNumber, need a total
         if !update and type_id == ActivityHandler::HABIT_NUMBER
           if params[:total].empty?
             Rails.logger.debug "Need a total number of completions"
@@ -241,7 +259,7 @@ module MyModules
           end
         end
 
-        # if habit week need per week 
+        # if HabitWeek, need per week 
         if !update and type_id == ActivityHandler::HABIT_WEEK
           if params[:per_week].empty?
             Rails.logger.debug "Need a number of completionsper week"
