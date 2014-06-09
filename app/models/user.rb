@@ -6,6 +6,8 @@ class User < ActiveRecord::Base
   before_save :encrypt_password
   before_create :create_remember_token
 
+  has_one :activity_handler
+
   validates :password, presence: true, length: { minimum: 6 }, confirmation: true
   VALID_EMAIL_REGEX = /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i
   validates(:email, presence: true, format: { with: VALID_EMAIL_REGEX},

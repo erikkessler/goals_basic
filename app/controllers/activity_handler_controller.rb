@@ -1,7 +1,13 @@
 class ActivityHandlerController < ApplicationController
+  include SessionsHelper
 
   def new
-    handler = ActivityHandler.find(1)
+    if current_user
+      handler = current_user.activity_handler
+    else
+      store_location
+      redirect_to log_in_path, :notice => "Sign in required."
+    end
     @activities = handler.get_parentable
     @errors = { }
     @values = { :show_date => Date.current, :habit_type => 'none', :period => 2,
@@ -11,7 +17,12 @@ class ActivityHandlerController < ApplicationController
   end
   
   def create
-    handler = ActivityHandler.find(1)
+    if current_user
+      handler = current_user.activity_handler
+    else
+      store_location
+      redirect_to log_in_path, :notice => "Sign in required."
+    end
     @errors = handler.create_activity(params)
     if !@errors[:new_act].nil?
       redirect_to :action => "today"
@@ -33,13 +44,19 @@ class ActivityHandlerController < ApplicationController
   end
 
   def today
-    handler = ActivityHandler.find(1)
-    today = handler.get_today
-    @complete = today[:complete]
-    @incomplete = today[:incomplete]
-    @overdue = today[:overdue]
-    @week_payout = 0
-    handler.roots(true).each {|act| @week_payout += handler.get_week_reward(act, Date.current) }
+    if signed_in?
+      handler = current_user.activity_handler
+      today = handler.get_today
+      @complete = today[:complete]
+      @incomplete = today[:incomplete]
+      @overdue = today[:overdue]
+      @week_payout = 0
+      handler.roots(true).each {|act| @week_payout += handler.get_week_reward(act, Date.current) }
+    else
+      store_location
+      redirect_to log_in_path, :notice => "Sign in required."
+    end
+    
 
   end
 

@@ -12,6 +12,7 @@ class ActivityHandler < ActiveRecord::Base
   PROGRESS_SUM = 6
   PROGRESS_AVG = 7
   PROGRESS_MAX = 8
+
   
   def create_activity(params)
     act_type = activity_type(params)

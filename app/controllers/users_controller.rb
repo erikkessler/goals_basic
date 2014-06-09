@@ -1,6 +1,6 @@
 class UsersController < ApplicationController
 
-  include SessionsHelper
+  include SessionsHelper, UsersHelper
 
   before_action :signed_in_user, only: [:edit,:update, :index]
   before_action :correct_user, only: [:edit, :update, :destroy]
@@ -14,6 +14,7 @@ class UsersController < ApplicationController
     @user = User.new(user_params)
     if @user.save
       sign_in @user
+      add_ah @user
       redirect_to root_url, :notice => "Signed Up!"
     else
       render "new"
@@ -67,5 +68,6 @@ class UsersController < ApplicationController
         redirect_to root_path, :flash => { :notice => "You must be admin to do that" }
       end
     end
+
   
 end
