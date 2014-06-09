@@ -58,21 +58,21 @@ class ActivityHandler < ActiveRecord::Base
   end
 
   def get_parentable
-    return Activity.where("(state is ? OR state is ?) AND rep_parent_id is ?",
+    return current_user.activities.where("(state is ? OR state is ?) AND rep_parent_id is ?",
                                  Activity::INCOMPLETE, Activity::OVERDUE, nil)
   end
 
   def it_and_children(id)
     it_children = [ ] 
     it_children << (id)
-    act = Activity.find(id)
+    act = current_user.activities.find(id)
     act.children.each{ |child| it_children << it_and_children(child.id) }
     act.rep_parent_id.nil? ? nil : it_children << act.rep_parent_id
     return it_children
   end
 
   def toggle(id)
-    activity = Activity.find(id)
+    activity = current_user.activities.find(id)
     state = activity.state
     if state == Activity::COMPLETE
       activity.incomplete
@@ -85,20 +85,20 @@ class ActivityHandler < ActiveRecord::Base
 
   def get_today
     today = { }
-    today[:complete] = Activity.
+    today[:complete] = current_user.activities.
       where("state is ? AND show_date is ?", 
             Activity::COMPLETE, Date.current)
-    today[:incomplete] = Activity.
+    today[:incomplete] = current_user.activities.
       where("state is ? AND show_date is ?", 
             Activity::INCOMPLETE, Date.current)
-    today[:overdue] = Activity.
+    today[:overdue] = current_user.activities.
       where("state is ?", 
             Activity::OVERDUE)
     return today
   end
 
   def update_act(params)
-    old_act = Activity.find(params[:id])
+    old_act = current_user.activities.find(params[:id])
     
     if old_act.class == FullTask or old_act.class == PartialTask
       old_act.name = params[:name]
@@ -111,10 +111,10 @@ class ActivityHandler < ActiveRecord::Base
       
       parent_id = params[:parent_id].to_i
       if !params[:parent_id].empty? and parent_id != old_act.parent_id
-            handler = ActivityHandler.find(1)
+            handler = current_user.activity_handler
             it_and_child = handler.it_and_children(old_act.id)
             if !it_and_child.include?(parent_id)
-              parent = Activity.find(parent_id)
+              parent = current_user.activities.find(parent_id)
               parent.add_child(old_act)
             end
       end
@@ -187,7 +187,7 @@ class ActivityHandler < ActiveRecord::Base
   end
 
   def remove_act(id)
-    activity = Activity.find(id)
+    activity = current_user.activities.find(id)
     activity.remove_act
     return "Removed #{activity.name}!"
   end
@@ -209,7 +209,7 @@ class ActivityHandler < ActiveRecord::Base
 
     for i in 0..6
       add_date= first_date.advance(:days => i)
-      acts = Activity.where(:show_date => add_date)
+      acts = current_user.activities.where(:show_date => add_date)
       days[add_date] = acts
     end
 
@@ -218,15 +218,15 @@ class ActivityHandler < ActiveRecord::Base
 
   def roots(all = false)
     if all
-      return Activity.where("rep_parent_id is ? AND is_root is ?", nil, true)
+      return current_user.activities.where("rep_parent_id is ? AND is_root is ?", nil, true)
     else 
-      return Activity.where("rep_parent_id is ? AND (state is ? OR state is ?) AND is_root is ?",
+      return current_user.activities.where("rep_parent_id is ? AND (state is ? OR state is ?) AND is_root is ?",
                             nil, Activity::INCOMPLETE, Activity::OVERDUE, true)
     end
   end
 
   def get_attributes(params)
-    act = Activity.find(params[:id])
+    act = current_user.activities.find(params[:id])
     if act.class == FullTask or act.class == PartialTask
       values = act.attributes.symbolize_keys
       values[:type_group] = 1

@@ -4,43 +4,50 @@ class ActivityHandlerController < ApplicationController
   def new
     if current_user
       handler = current_user.activity_handler
+      @activities = handler.get_parentable
+      @errors = { }
+      @values = { :show_date => Date.current, :habit_type => 'none', :period => 2,
+        :type_group => 1}
+      @method = :post
+      @path = '/activity_handler'
     else
       store_location
       redirect_to log_in_path, :notice => "Sign in required."
     end
-    @activities = handler.get_parentable
-    @errors = { }
-    @values = { :show_date => Date.current, :habit_type => 'none', :period => 2,
-    :type_group => 1}
-    @method = :post
-    @path = '/activity_handler'
+    
   end
   
   def create
     if current_user
       handler = current_user.activity_handler
+      @errors = handler.create_activity(params)
+      if !@errors[:new_act].nil?
+        redirect_to :action => "today"
+      else
+        @values = params
+        if @values[:habit_type].nil?
+          @values[:habit_type] = 'none'
+        end
+        @activities = handler.get_parentable
+        @method = :post
+        @path = '/activity_handler'
+        render 'new'
+      end
     else
-      store_location
       redirect_to log_in_path, :notice => "Sign in required."
     end
-    @errors = handler.create_activity(params)
-    if !@errors[:new_act].nil?
-      redirect_to :action => "today"
-    else
-      @values = params
-      if @values[:habit_type].nil?
-        @values[:habit_type] = 'none'
-      end
-      @activities = handler.get_parentable
-      @method = :post
-      @path = '/activity_handler'
-      render 'new'
-    end
+    
   end
 
 
   def show
-    @activity = Activity.find(params[:id])
+    if current_user
+      handler = current_user.activity_handler
+      @activity = handler.find_act(params[:id])
+    else
+      store_location
+      redirect_to log_in_path, :notice => "Sign in required."
+    end
   end
 
   def today
@@ -65,52 +72,80 @@ class ActivityHandlerController < ApplicationController
   end
 
   def toggle
-    handler = ActivityHandler.find(1)
-    flash[:notice] = handler.toggle(params[:id])
-    redirect_to :action => "today"
+    if current_user
+      handler = current_user.activity_handler
+      flash[:notice] = handler.toggle(params[:id])
+      redirect_to :action => "today"
+    else
+      redirect_to log_in_path, :notice => "Sign in required."
+    end
   end
 
   def destroy
-    handler = ActivityHandler.find(1)
-    flash[:notice] = handler.remove_act(params[:id])
-    redirect_to :action => "today"
+    if current_user
+      handler = current_user.activity_handler
+      flash[:notice] = handler.remove_act(params[:id])
+      redirect_to :action => "today"
+    else
+      redirect_to log_in_path, :notice => "Sign in required."
+    end
   end
 
   def edit
-    handler = ActivityHandler.find(1)
-    @activities = handler.get_parentable.where.not(:id => handler.it_and_children(params[:id]))
-    @errors = { }
-    @values = handler.get_attributes(params)
-    @method = :patch
-    @path = "/activity_handler/#{params[:id]}"
+    if current_user
+      handler = current_user.activity_handler
+      @activities = handler.get_parentable.where.not(:id => handler.it_and_children(params[:id]))
+      @errors = { }
+      @values = handler.get_attributes(params)
+      @method = :patch
+      @path = "/activity_handler/#{params[:id]}"
+    else
+      store_location
+      redirect_to log_in_path, :notice => "Sign in required."
+    end
   end
 
   def update
-    handler = ActivityHandler.find(1)
-    @errors = handler.check_form_errors(params, true)
-    if !@errors.empty?
-      @values = params
-      @activities = handler.get_parentable.where.not(:id => handler.it_and_children(params[:id]))
-      @method = :patch
-      @path = "/activity_handler/#{params[:id]}"
-      render 'edit'
+    if current_user
+      handler = current_user.activity_handler
+      @errors = handler.check_form_errors(params, true)
+      if !@errors.empty?
+        @values = params
+        @activities = handler.get_parentable.where.not(:id => handler.it_and_children(params[:id]))
+        @method = :patch
+        @path = "/activity_handler/#{params[:id]}"
+        render 'edit'
+      else
+        handler.update_act(params)
+        redirect_to :action => "today"
+      end
     else
-      handler.update_act(params)
-      redirect_to :action => "today"
+      redirect_to log_in_path, :notice => "Sign in required."
     end
   end
 
   def week
-    if params[:date].nil?
-      redirect_to :action => "week", :date => 'this_week'
+    if current_user
+      handler = current_user.activity_handler
+      if params[:date].nil?
+        redirect_to :action => "week", :date => 'this_week'
+      else
+        handler = ActivityHandler.find(1)
+        @days = handler.week(params[:date], :monday)
+      end
     else
-      handler = ActivityHandler.find(1)
-      @days = handler.week(params[:date], :monday)
+      store_location
+      redirect_to log_in_path, :notice => "Sign in required."
     end
   end
 
   def overview
-    handler = ActivityHandler.find(1)
-    @roots = handler.roots
+    if current_user
+      handler = current_user.activity_handler
+      @roots = handler.roots
+    else
+      store_location
+      redirect_to log_in_path, :notice => "Sign in required."
+    end
   end
 end
