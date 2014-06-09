@@ -111,9 +111,9 @@ class ActivityHandlerController < ApplicationController
     if current_user
       handler = current_user.activity_handler
       @activities = handler.get_parentable(current_user)
-        .where.not(:id => handler.it_and_children(params[:id]))
+        .where.not(:id => handler.it_and_children(params[:id], current_user))
       @errors = { }
-      @values = handler.get_attributes(params)
+      @values = handler.get_attributes(params, current_user)
       @method = :patch
       @path = "/activity_handler/#{params[:id]}"
     else
@@ -129,7 +129,7 @@ class ActivityHandlerController < ApplicationController
       if !@errors.empty?
         @values = params
         @activities = handler.get_parentable(current_user)
-          .where.not(:id => handler.it_and_children(params[:id]))
+          .where.not(:id => handler.it_and_children(params[:id], current_user))
         @method = :patch
         @path = "/activity_handler/#{params[:id]}"
         render 'edit'

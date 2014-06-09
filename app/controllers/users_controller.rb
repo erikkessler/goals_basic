@@ -15,6 +15,7 @@ class UsersController < ApplicationController
     if @user.save
       sign_in @user
       add_ah @user
+      Rails.logger.debug "#{DateTime.current} - #{@user.email} created an account"
       redirect_to root_url, :notice => "Signed Up!"
     else
       render "new"
@@ -43,7 +44,10 @@ class UsersController < ApplicationController
   end
 
   def destroy
-    User.find(params[:id]).destroy
+    user = User.find(params[:id])
+    user.activity_handler.destroy
+    user.destroy
+    Rails.logger.debug "#{DateTime.current} - #{user.email}'s account removed"
     redirect_to users_path, :notice => "User deleted."
   end
 
