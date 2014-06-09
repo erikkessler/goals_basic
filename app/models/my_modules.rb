@@ -57,6 +57,8 @@ module MyModules
         parent.add_child(new_activity)
       end
 
+      current_user.activities << new_activity
+
       return errors
 
     end
@@ -126,6 +128,9 @@ module MyModules
       else
         new_activity.gen_reps(Date.current, Date.parse(params[:expiration_date]), period)
       end
+
+      current_children.activities << new_activity
+      new_activity.repititions.each {|rep| current_children.activities << rep }
 
       return errors
     end
