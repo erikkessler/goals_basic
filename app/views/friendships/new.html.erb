@@ -1,0 +1,11 @@
+<h1>Follow a friend or mentor a student</h1>
+
+<%= form_tag '/friendships', id: 'add_friend_form' do %>
+<% unless @errors.nil? %>
+<div id="errors"><%= @errors %></div></br>
+<% end %>
+<%= label_tag 'email', "Enter a email:" %></br>
+<%= text_field_tag 'email' %></br></br>
+<%= check_box_tag 'mentor', "yes" %>
+<%= label_tag 'mentor', "Mentor-Student relationship?" %>
+<% end %>

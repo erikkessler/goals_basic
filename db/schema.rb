@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140610181801) do
+ActiveRecord::Schema.define(version: 20140610195508) do
 
   create_table "activities", force: true do |t|
     t.integer  "repeated"
@@ -48,6 +48,16 @@ ActiveRecord::Schema.define(version: 20140610181801) do
     t.date     "upto_date"
     t.integer  "user_id"
   end
+
+  create_table "friendships", force: true do |t|
+    t.integer  "user_id"
+    t.integer  "friend_id"
+    t.datetime "created_at"
+    t.datetime "updated_at"
+    t.integer  "kind"
+  end
+
+  add_index "friendships", ["user_id"], name: "index_friendships_on_user_id"
 
   create_table "permissions", force: true do |t|
     t.integer  "user_id"

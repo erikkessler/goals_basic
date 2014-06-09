@@ -8,6 +8,7 @@ Rails.application.routes.draw do
 
   resources :users
   resources :sessions
+  resources :friendships
 
   get "sign_up" => "users#new", :as => "sign_up"
   get "log_in" => "sessions#new", :as => "log_in"
