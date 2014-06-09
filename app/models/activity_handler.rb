@@ -1,7 +1,7 @@
 # This class bridges the Activity framework to the user
 
 class ActivityHandler < ActiveRecord::Base
-  include MyModules
+  include MyModules, SessionsHelper
 
   FULL_TASK = 0
   PARTIAL_TASK = 1

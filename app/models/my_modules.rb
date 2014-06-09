@@ -2,6 +2,7 @@ module MyModules
   
   # This module hold methods for the ActivityHelper to use
   module ActivityHelper
+    include SessionsHelper
     
     # Creates an acitvity of the correct type
     def self.create_activity(type_id, params)
