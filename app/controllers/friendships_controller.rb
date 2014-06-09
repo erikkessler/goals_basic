@@ -1,10 +1,18 @@
 class FriendshipsController < ApplicationController
   include SessionsHelper
 
+  before_action :signed_in_user
+
   def create
     friend = User.find_by_email(params[:email])
     if friend.nil?
       @errors = "No user found with that email"
+      render 'new'
+    elsif current_user.id == friend.id
+      @errors = "You can't friend yourself"
+      render 'new'
+    elsif !current_user.friendships.find_by_friend_id(friend.id).nil?
+      @errors = "Friendship already exists"
       render 'new'
     else
       rel_type = nil
@@ -27,4 +35,11 @@ class FriendshipsController < ApplicationController
     flash[:notice] = "Removed friendship."
     redirect_to current_user
   end
+
+  private
+    # Before filters
+    def signed_in_user
+      store_location
+      redirect_to log_in_path, :notice => "Sign in required." unless signed_in?
+    end
 end

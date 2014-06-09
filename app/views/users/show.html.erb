@@ -3,6 +3,26 @@
   <%= @user.email %>
 </p>
 
+<strong>Following</strong>
+<ul>
+  <% for friendship in @user.friendships.where("kind is ?", Friendship::FOLLOWER) %>
+    <li>
+      <%=h friendship.friend.email %>
+      (<%= link_to "remove", friendship, :method => :delete %>)
+    </li>
+  <% end %>
+</ul>
+
+<strong>Mentoring</strong>
+<ul>
+  <% for friendship in @user.friendships.where("kind is ?", Friendship::MENTOR) %>
+    <li>
+      <%=h friendship.friend.email %>
+      (<%= link_to "remove", friendship, :method => :delete %>)
+    </li>
+  <% end %>
+</ul>
+
 
 <%= link_to 'Home', root_path %> | <%= link_to 'Edit',
-					edit_user_path(@user) %>
+					edit_user_path(@user) %> | <%= link_to 'Add Friend', new_friendship_path %>
