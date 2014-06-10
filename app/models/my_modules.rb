@@ -186,17 +186,17 @@ module MyModules
       errors = { }
       
       # ensure it has a name
-      if params[:name].empty?
+      if params[:name].nil? or params[:name].empty?
         Rails.logger.debug "No name for full task"
         errors[:name] = "Must have a name"
       end
 
-      if !params[:reward].empty? and params[:reward].to_i < 0
+      if !params[:reward].nil? and !params[:reward].empty? and params[:reward].to_i < 0
         Rails.logger.debug "Reward less than 0"
         errors[:reward] = "Reward must be greater than 0"
       end
 
-      if !params[:penalty].empty? and params[:penalty].to_i < 0
+      if !params[:reward].nil? and !params[:penalty].empty? and params[:penalty].to_i < 0
         Rails.logger.debug "Reward less than 0"
         errors[:penalty] = "Reward must be greater than 0"
       end
@@ -214,7 +214,7 @@ module MyModules
 
         
         # ensure it has a show_date
-        if params[:show_date].empty?
+        if params[:show_date].nil? or params[:show_date].empty?
           Rails.logger.debug "No show date for full task"
           errors[:show_date] = "Must include a date to show the task on"
         else
@@ -233,7 +233,7 @@ module MyModules
         
 
         # make sure expiration date after show date
-        if !params[:expiration_date].empty? 
+        if !params[:expiration_date].nil? and !params[:expiration_date].empty? 
           begin
             if (Date.parse(params[:expiration_date]) < Date.parse(params[:show_date]))
               Rails.logger.debug "Expiration date before show"

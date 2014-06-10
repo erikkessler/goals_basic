@@ -243,7 +243,7 @@ class ActivityHandler < ActiveRecord::Base
   def remove_act(id, current_user)
     activity = get_activities(current_user).find(id)
     activity.remove_act
-    if acitvity.is_a? (Habit) and (activity.report_to == Activity::FOLLOWERS or 
+    if activity.is_a? (Habit) and (activity.report_to == Activity::FOLLOWERS or 
                                    activity.report_to == Activity::BOTH)
       current_user.feed_items.create(:message => 
                                      "gave up on the habit #{activity.name}")

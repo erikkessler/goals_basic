@@ -1,0 +1,6 @@
+<% if @errors[:new_act].nil? %>
+    
+<% else %>
+    $("<%= escape_javascript( render partial: 'today_task', object: @errors[:new_act], as: 'act' )  %>").appendTo(".today_tasks")
+    $("#name").val("")
+<% end %>

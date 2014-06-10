@@ -7,8 +7,10 @@
   </div>
 </div>
 
-<h1>Today's Activities</h1> 
-<%= link_to "add activity", new_activity_handler_path %><br>
+<div class="title">
+  <h1>Today's Activities</h1> 
+</div>
+
 <% if !@overdue.empty? %>
   <h3>Overdue:</h3>
   <ul>
@@ -17,16 +19,30 @@
   <% end %>
   </ul>
 <% end %>
-<% if !@incomplete.empty? %>
+
   <div id="today">
   <h3>Scheduled for Today:</h3>
   <ul>
-  <% @incomplete.each do |act| %>
-    <li><%= link_to act.name, controller: "activity_handler", action: "show", id: act.id %> | <%= link_to "Complete",  controller: "activity_handler", action: "toggle", id: act.id %> | <%= link_to "Remove", activity_handler_path(act.id), method: :delete %> | <%= link_to "Edit", edit_activity_handler_path(act.id) %></li>
-  <% end %>
+    <span class="today_tasks">
+      <% @incomplete.each do |act| %>
+	<li><%= link_to act.name, controller: "activity_handler", action: "show", id: act.id %> | <%= link_to "Complete",  controller: "activity_handler", action: "toggle", id: act.id %> | <%= link_to "Remove", activity_handler_path(act.id), method: :delete %> | <%= link_to "Edit", edit_activity_handler_path(act.id) %></li>
+      <% end %>
+    </span>
+  <li>
+    <%= form_tag('/activity_handler', id: "add_task", remote: true) do %>
+      <%= text_field_tag 'name' %>
+      <%= hidden_field_tag 'type_group', 1 %>
+      <%= hidden_field_tag 'show_date', Date.current %>
+      <%= hidden_field_tag 'report_to', 0 %>
+      <%= hidden_field_tag 'expiration_date', "" %>
+      <%= hidden_field_tag 'reward', "" %>
+      <%= hidden_field_tag 'penalty', "" %>
+      <%= hidden_field_tag 'parent_id', "" %>
+    <% end %>
+  </li>
   </ul>
   </div>
-<% end %>
+
 <% if !@complete.empty? %>
   <h3>Complete:</h3>
   <ul>

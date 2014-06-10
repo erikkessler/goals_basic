@@ -25,19 +25,26 @@ class ActivityHandlerController < ApplicationController
 
     # create the activity, if there is a new_act there were no errors
     @errors = handler.create_activity(params, current_user)
-    if !@errors[:new_act].nil?
-      redirect_to :action => "today"
-    else
-      # there were errors, prep to render the form again
-      @values = params
-      if @values[:habit_type].nil?
-        @values[:habit_type] = 'none'
-      end
-      @activities = handler.get_parentable(current_user)
-      @method = :post
-      @path = '/activity_handler'
-      render 'new'
-    end 
+
+    respond_to do |format|
+      if !@errors[:new_act].nil?
+        format.html { redirect_to :action => "today", notice: "Created task" }
+        format.js {}
+      else
+        format.html {
+          # there were errors, prep to render the form again
+          @values = params
+          if @values[:habit_type].nil?
+            @values[:habit_type] = 'none'
+          end
+          @activities = handler.get_parentable(current_user)
+          @method = :post
+          @path = '/activity_handler'
+          render 'new'
+        }
+        format.js {}
+      end 
+    end
   end
 
   # Shows the details of an activity
