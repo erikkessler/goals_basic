@@ -1,41 +1,47 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>GoalsBasic</title>
-  <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' => true %>
-  <%= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
-  <%= csrf_meta_tags %>
-</head>
-<body>
+  <head>
+    <title>GoalsBasic</title>
+    <%= stylesheet_link_tag    'application', media: 'all', 'data-turbolinks-track' => true %>
+    <%= javascript_include_tag 'application', 'data-turbolinks-track' => true %>
+    <%= csrf_meta_tags %>
+  </head>
+  <body>
 
-  <div id="user_nav">
-    <ul>
-      <li><%= link_to "Today", today_path %></li>
-      <li><%= link_to "Week", week_path %></li>
-      <li><%= link_to "Overview", overview_path %></li>
-    </ul>
-</div>
+    <div class="header">
+      <ul class="left_nav">
+	<li><%= link_to "Today", today_path %></li>
+	<li><%= link_to "Week", week_path %></li>
+	<li><%= link_to "Overview", overview_path %></li>
+      </ul>
 
-  <div id="account_nav">
-  <% if current_user %>
-    Logged in as <%= current_user.email %>.
-    <%= link_to "Log out", log_out_path %>
-    <%= link_to "Profile", user_path(current_user) %>
-  <% else %>
-    <%= link_to "Sign up", sign_up_path %> or 
-    <%= link_to "log in", log_in_path %>
-  <% end %>
-</div>
+      <div class="logo">
+	<%= link_to "inspireDO", root_url %>
+      </div>
+      <ul class="right_nav">
+	<li>
+	  <% if current_user %>
+	    <%= link_to current_user.email, user_path(current_user) %> |
+	    <%= link_to "Log out", log_out_path %>
+	  <% else %>
+	    <%= link_to "Sign up", sign_up_path %> or 
+	    <%= link_to "log in", log_in_path %>
+	  <% end %>
+	</li>
+      </ul>
+    </div>
+    <div class="container">
 
-  <% if flash[:notice] %>
-    <div class="notice"><%= flash[:notice] %></div>
-  <% end %>
+      <% if flash[:notice] %>
+	<div class="notice"><%= flash[:notice] %></div>
+      <% end %>
 
-  <% if flash[:alert] %>
-    <div class="alert"><%= flash[:alert] %></div>
-  <% end %>
+      <% if flash[:alert] %>
+	<div class="alert"><%= flash[:alert] %></div>
+      <% end %>
 
-  <%= yield %>
+      <%= yield %>
+    </div>
 
-</body>
+  </body>
 </html>
