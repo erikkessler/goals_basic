@@ -2,7 +2,7 @@ class UsersController < ApplicationController
 
   include SessionsHelper, UsersHelper
 
-  before_action :signed_in_user, only: [:edit,:update, :index]
+  before_action :signed_in_user, only: [:edit,:update, :index, :feed]
   before_action :correct_user, only: [:edit, :update, :destroy, :show]
   before_action :admin_user, only: [:index]
 
@@ -51,6 +51,10 @@ class UsersController < ApplicationController
     user.destroy
     Rails.logger.debug "#{DateTime.current} - #{user.email}'s account removed"
     redirect_to users_path, :notice => "User deleted."
+  end
+
+  def feed
+    @items = FeedItem.from_users_followed_by(current_user)
   end
 
   private

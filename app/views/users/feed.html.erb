@@ -1,0 +1,6 @@
+<h1>Feed</h1>
+<% @items.each do |item| %>
+  <p><%= item.user.email %> - <%= item.message %></br>
+    <%= item.created_at.to_formatted_s(:long) %>
+  </p>
+<% end %>

@@ -99,7 +99,7 @@ class ActivityHandlerController < ApplicationController
       @path = "/activity_handler/#{params[:id]}"
       render 'edit'
     else
-      handler.update_act(params)
+      handler.update_act(params, current_user)
       redirect_to :action => "today"
     end
   end

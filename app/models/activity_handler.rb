@@ -137,6 +137,7 @@ class ActivityHandler < ActiveRecord::Base
       old_act.description = params[:description]
       old_act.show_date = params[:show_date]
       old_act.expiration_date = params[:expiration_date]
+      old_act.report_to = params[:report_to]
       if set_rewards
         old_act.reward = params[:reward]
         old_act.penalty = params[:penalty]
@@ -172,6 +173,7 @@ class ActivityHandler < ActiveRecord::Base
       # change the name, desc, reward, penalty
       old_act.name = params[:name]
       old_act.description = params[:description]
+      old_act.report_to = params[:report_to]
       if set_rewards
         old_act.reward = params[:reward]
         old_act.penalty = params[:penalty]
@@ -183,6 +185,7 @@ class ActivityHandler < ActiveRecord::Base
       old_act.repititions.each do |rep|
         rep.name = params[:name]
         rep.description = params[:description]
+        rep.report_to = params[:report_to]
         if set_rewards
           rep.reward = params[:reward]
           rep.penalty = params[:penalty]

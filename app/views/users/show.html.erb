@@ -23,6 +23,16 @@
   <% end %>
 </ul>
 
+<strong>Followed By</strong>
+<ul>
+  <% for friendship in @user.inverse_friendships.where("kind is ?", Friendship::FOLLOWER) %>
+    <li>
+      <%=h friendship.friend.email %>
+      (<%= link_to "remove", friendship, :method => :delete %>)
+    </li>
+  <% end %>
+</ul>
+
 
 <%= link_to 'Home', root_path %> | <%= link_to 'Edit',
 					edit_user_path(@user) %> | <%= link_to 'Add Friend', new_friendship_path %>
