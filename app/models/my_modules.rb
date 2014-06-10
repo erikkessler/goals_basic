@@ -33,22 +33,30 @@ module MyModules
         return errors
       end
 
+      
+
       # create the new task
       new_activity = nil
       if type_id == ActivityHandler::FULL_TASK
-        new_activity = FullTask.create(name: params[:name], 
+        new_activity = FullTask.new(name: params[:name], 
+                                    show_date: params[:show_date], 
+                                    description: params[:description],
+                                    expiration_date: params[:expiration_date])
+        if current_user.set_rewards
+          new_activity.reward = params[:reward]
+          new_activity.penalty = params[:penalty]
+        end
+        new_activity.save!
+      elsif type_id == ActivityHandler::PARTIAL_TASK
+        new_activity = PartialTask.new(name: params[:name], 
                                        show_date: params[:show_date], 
                                        description: params[:description],
-                                       expiration_date: params[:expiration_date],
-                                       reward: params[:reward],
-                                       penalty: params[:penalty])
-      elsif type_id == ActivityHandler::PARTIAL_TASK
-        new_activity = PartialTask.create(name: params[:name], 
-                                          show_date: params[:show_date], 
-                                          description: params[:description],
-                                          expiration_date: params[:expiration_date],
-                                          reward: params[:reward],
-                                          penalty: params[:penalty])
+                                       expiration_date: params[:expiration_date])
+        if current_user.set_rewards
+          new_activity.reward = params[:reward]
+          new_activity.penalty = params[:penalty]
+        end
+        new_activity.save!
       end
 
       errors[:new_act] = new_activity
@@ -61,7 +69,8 @@ module MyModules
       end
 
       # add activity to the user
-      current_user.activities << new_activity
+      Permission.create(user_id: current_user.id, activity_id: new_activity.id, 
+                        level: Permission::PRIVATE)
 
       return errors
 
@@ -87,21 +96,28 @@ module MyModules
       # create the new habit
       new_activity = nil
       if type_id == ActivityHandler::HABIT
-        new_activity = Habit.create(name: params[:name],
-                                    description: params[:description],
-                                    expiration_date: params[:expiration_date],
-                                    reward: params[:reward],
-                                    penalty: params[:penalty],
-                                    period: period)
+        new_activity = Habit.new(name: params[:name],
+                                 description: params[:description],
+                                 expiration_date: params[:expiration_date],
+                                 period: period)
+        if current_user.set_rewards
+          new_activity.reward = params[:reward]
+          new_activity.penalty = params[:penalty]
+        end
+        new_activity.save!
                                     
       elsif type_id == ActivtiyHandler::HABIT_NUMBER
-        new_activity = HabitNumber.create(name: params[:name],
-                                          description: params[:description],
-                                          expiration_date: params[:expiration_date],
-                                          reward: params[:reward],
-                                          penalty: params[:penalty],
-                                          period: period,
-                                          count_goal: params[:total])
+        new_activity = HabitNumber.new(name: params[:name],
+                                       description: params[:description],
+                                       expiration_date: params[:expiration_date],
+                                       period: period,
+                                       count_goal: params[:total])
+
+        if current_user.set_rewards
+          new_activity.reward = params[:reward]
+          new_activity.penalty = params[:penalty]
+        end
+        new_activity.save!
       elsif type_id == ActivityHadler::HABIT_WEEK
         weeks = params[:weeks]
         if weeks.empty?
@@ -110,11 +126,14 @@ module MyModules
         new_activity = HabitWeek.create(name: params[:name],
                                         description: params[:description],
                                         expiration_date: params[:expiration_date],
-                                        reward: params[:reward],
-                                        penalty: params[:penalty],
                                         period: period,
                                         count: params[:per_week])
+        if current_user.set_rewards
+          new_activity.reward = params[:reward]
+          new_activity.penalty = params[:penalty]
+        end
         new_activity.set_weeks(weeks)
+        new_activity.save!
       end
 
       errors[:new_act] = new_activity
@@ -142,8 +161,11 @@ module MyModules
       end
 
       # add the habit and all reps to the user
-      current_user.activities << new_activity
-      new_activity.repititions.each {|rep| current_user.activities << rep }
+      Permission.create(user_id: current_user.id, activity_id: new_activity.id, 
+                        level: Permission::PRIVATE)
+      new_activity.repititions.each {|rep| 
+        Permission.create(user_id: current_user.id, activity_id: rep.id, 
+                          level: Permission::PRIVATE) }
 
       return errors
     end

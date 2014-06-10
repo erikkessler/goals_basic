@@ -7,7 +7,7 @@ class User < ActiveRecord::Base
   before_create :create_remember_token
 
   has_one :activity_handler
-  has_many :activities
+  has_many :activities, :through =>:permissions
   has_many :permissions
 
   validates :password, presence: true, length: { minimum: 6 }, confirmation: true

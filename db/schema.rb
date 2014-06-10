@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140610174714) do
+ActiveRecord::Schema.define(version: 20140610181801) do
 
   create_table "activities", force: true do |t|
     t.integer  "repeated"
@@ -57,6 +57,9 @@ ActiveRecord::Schema.define(version: 20140610174714) do
     t.datetime "updated_at"
   end
 
+  add_index "permissions", ["activity_id"], name: "index_permissions_on_activity_id"
+  add_index "permissions", ["user_id"], name: "index_permissions_on_user_id"
+
   create_table "type_groups", force: true do |t|
     t.string   "name"
     t.text     "description"
@@ -83,6 +86,7 @@ ActiveRecord::Schema.define(version: 20140610174714) do
     t.boolean  "admin"
     t.datetime "created_at"
     t.datetime "updated_at"
+    t.boolean  "set_rewards",    default: true, null: false
   end
 
   add_index "users", ["remember_token"], name: "index_users_on_remember_token"

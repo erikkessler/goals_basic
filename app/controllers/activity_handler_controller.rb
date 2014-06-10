@@ -7,6 +7,7 @@ class ActivityHandlerController < ApplicationController
 
   before_action :signed_in_user
   before_action :activity_not_in_past, only: [:edit, :update, :toggle]
+  before_action :can_edit, only: [:edit, :update, :destroy]
 
   # Creating a new activity
   def new
@@ -130,5 +131,9 @@ class ActivityHandlerController < ApplicationController
     def activity_not_in_past
       act = current_user.activity_handler.find_act(params[:id], current_user)
       return redirect_to activity_handler_path, :notice => "Can't edit a past task" unless act.show_date >= Date.current
+    end
+
+    def can_edit
+      redirect_to activity_handler_path, :notice => "You don't have permission to edit" unless current_user.permissions.where("activity_id is ?", params[:id])[0].can_edit?
     end
 end

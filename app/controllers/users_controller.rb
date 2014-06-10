@@ -46,6 +46,8 @@ class UsersController < ApplicationController
   def destroy
     user = User.find(params[:id])
     user.activity_handler.destroy
+    user.permissions.where("level is ?", Permission::PRIVATE).each {|p| p.activity.destroy }
+    user.permissions.destroy_all
     user.destroy
     Rails.logger.debug "#{DateTime.current} - #{user.email}'s account removed"
     redirect_to users_path, :notice => "User deleted."

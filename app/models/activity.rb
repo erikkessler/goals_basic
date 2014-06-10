@@ -190,6 +190,7 @@ class Activity < ActiveRecord::Base
     # check if parent should update completeness
     old_parent = self.parent
 
+    self.permissions.destroy_all
     self.destroy
     
     # refresh parent completeness

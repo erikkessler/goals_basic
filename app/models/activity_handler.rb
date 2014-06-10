@@ -67,8 +67,10 @@ class ActivityHandler < ActiveRecord::Base
 
   # Gets activities that can be parents - incomplete or overdue
   def get_parentable(current_user)
-    return current_user.activities.where("(state is ? OR state is ?) AND rep_parent_id is ?",
-                                 Activity::INCOMPLETE, Activity::OVERDUE, nil)
+    activities = get_activities(current_user)
+    
+    return activities.where("(state is ? OR state is ?) AND rep_parent_id is ?", Activity::INCOMPLETE, Activity::OVERDUE, nil)
+    
   end
 
   # Takes an id and returns an array of activity ids that are the id or are children.
@@ -76,7 +78,8 @@ class ActivityHandler < ActiveRecord::Base
   def it_and_children(id, current_user)
     it_children = [ ] 
     it_children << (id)
-    act = current_user.activities.find(id)
+    activities = get_activities(current_user)
+    act = activities.find(id)
     act.children.each{ |child| it_children << it_and_children(child.id) }
     act.rep_parent_id.nil? ? nil : it_children << act.rep_parent_id
     return it_children
@@ -85,7 +88,8 @@ class ActivityHandler < ActiveRecord::Base
   # Toggles the state of the activity. If it is complete, calls incomplete, if incomplete or
   # overdue calls complete
   def toggle(id, current_user)
-    activity = current_user.activities.find(id)
+    activities = get_activities(current_user)
+    activity = activities.find(id)
     state = activity.state
     if state == Activity::COMPLETE
       activity.incomplete
@@ -98,14 +102,15 @@ class ActivityHandler < ActiveRecord::Base
 
   # Gets activities that should be shown today - complete, incomplete, and overdue
   def get_today(current_user)
+    activities = get_activities(current_user)
     today = { }
-    today[:complete] = current_user.activities.
+    today[:complete] = activities.
       where("state is ? AND show_date is ?", 
             Activity::COMPLETE, Date.current)
-    today[:incomplete] = current_user.activities.
+    today[:incomplete] = activities.
       where("state is ? AND show_date is ?", 
             Activity::INCOMPLETE, Date.current)
-    today[:overdue] = current_user.activities.
+    today[:overdue] = activities.
       where("state is ?", 
             Activity::OVERDUE)
     return today
@@ -113,7 +118,9 @@ class ActivityHandler < ActiveRecord::Base
 
   # Updates the activity based on what type it is
   def update_act(params, current_user)
-    old_act = current_user.activities.find(params[:id])
+    activities = get_activities(current_user)
+    set_rewards = current_user.set_rewards
+    old_act = activities.find(params[:id])
     
     # tasks
     if old_act.class == FullTask or old_act.class == PartialTask
@@ -122,8 +129,10 @@ class ActivityHandler < ActiveRecord::Base
       old_act.description = params[:description]
       old_act.show_date = params[:show_date]
       old_act.expiration_date = params[:expiration_date]
-      old_act.reward = params[:reward]
-      old_act.penalty = params[:penalty]
+      if set_rewards
+        old_act.reward = params[:reward]
+        old_act.penalty = params[:penalty]
+      end
       old_act.save!
       
       # if parent changed, makes sure it a valid change and change it
@@ -132,7 +141,7 @@ class ActivityHandler < ActiveRecord::Base
             handler = current_user.activity_handler
             it_and_child = handler.it_and_children(old_act.id)
             if !it_and_child.include?(parent_id)
-              parent = current_user.activities.find(parent_id)
+              parent = Activity.find(parent_id)
               parent.add_child(old_act)
             end
       end
@@ -155,16 +164,21 @@ class ActivityHandler < ActiveRecord::Base
       # change the name, desc, reward, penalty
       old_act.name = params[:name]
       old_act.description = params[:description]
-      old_act.reward = params[:reward]
-      old_act.penalty = params[:penalty]
+      if set_rewards
+        old_act.reward = params[:reward]
+        old_act.penalty = params[:penalty]
+      end
       old_act.save!
       
       # change it for the reps as well
+      
       old_act.repititions.each do |rep|
         rep.name = params[:name]
         rep.description = params[:description]
-        rep.reward = params[:reward]
-        rep.penalty = params[:penalty]
+        if set_rewards
+          rep.reward = params[:reward]
+          rep.penalty = params[:penalty]
+        end
         rep.save!
       end
 
@@ -216,13 +230,14 @@ class ActivityHandler < ActiveRecord::Base
 
   # calls remove_act on the activity
   def remove_act(id, current_user)
-    activity = current_user.activities.find(id)
+    activity = get_activities(current_user).find(id)
     activity.remove_act
     return "Removed #{activity.name}!"
   end
 
   # gets the activities that are assigned for each day of the week
   def week(date, week_begin, current_user)
+    activities = get_activities(current_user)
     days = {}
     if date == "this_week"
       date = Date.current
@@ -241,7 +256,7 @@ class ActivityHandler < ActiveRecord::Base
     # go through each day of the week and get the activities
     for i in 0..6
       add_date= first_date.advance(:days => i)
-      acts = current_user.activities.where(:show_date => add_date)
+      acts = activities.where(:show_date => add_date)
       days[add_date] = acts
     end
 
@@ -252,9 +267,9 @@ class ActivityHandler < ActiveRecord::Base
   # incomplete/overdue.
   def roots(all = false, current_user)
     if all
-      return current_user.activities.where("rep_parent_id is ? AND is_root is ?", nil, true)
+      return get_activities(current_user).where("rep_parent_id is ? AND is_root is ?", nil, true)
     else 
-      return current_user.activities.where("rep_parent_id is ? AND (state is ? OR state is ?) AND is_root is ?",
+      return get_activities(current_user).where("rep_parent_id is ? AND (state is ? OR state is ?) AND is_root is ?",
                             nil, Activity::INCOMPLETE, Activity::OVERDUE, true)
     end
   end
@@ -262,7 +277,7 @@ class ActivityHandler < ActiveRecord::Base
   # Gets the attributes of a certain activity and puts them in a format that allows the 
   # forms to preset their data when editing an activity
   def get_attributes(params, current_user)
-    act = current_user.activities.find(params[:id]) # get the activity
+    act = get_activities(current_user).find(params[:id]) # get the activity
 
     # Check what type it is
     if act.class == FullTask or act.class == PartialTask
@@ -337,5 +352,9 @@ class ActivityHandler < ActiveRecord::Base
   def get_week_reward(act, date, start = :monday)
     return act.week_payout(date, start)
 
+  end
+
+  def get_activities(user)
+    return user.activities.where("permissions.level != ?", Permission::FROM_USER)
   end
 end
