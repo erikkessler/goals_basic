@@ -6,6 +6,7 @@ class ActivityHandlerController < ApplicationController
   include SessionsHelper
 
   before_action :signed_in_user
+  before_action :activity_not_in_past, only: [:edit, :update, :toggle]
 
   # Creating a new activity
   def new
@@ -124,5 +125,10 @@ class ActivityHandlerController < ApplicationController
     def signed_in_user
       store_location
       redirect_to log_in_path, :notice => "Sign in required." unless signed_in?
+    end
+
+    def activity_not_in_past
+      act = current_user.activity_handler.find_act(params[:id], current_user)
+      return redirect_to activity_handler_path, :notice => "Can't edit a past task" unless act.show_date >= Date.current
     end
 end
