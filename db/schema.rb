@@ -11,7 +11,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20140609005544) do
+ActiveRecord::Schema.define(version: 20140610174714) do
 
   create_table "activities", force: true do |t|
     t.integer  "repeated"
@@ -47,6 +47,14 @@ ActiveRecord::Schema.define(version: 20140609005544) do
     t.date     "reset_date"
     t.date     "upto_date"
     t.integer  "user_id"
+  end
+
+  create_table "permissions", force: true do |t|
+    t.integer  "user_id"
+    t.integer  "activity_id"
+    t.integer  "level"
+    t.datetime "created_at"
+    t.datetime "updated_at"
   end
 
   create_table "type_groups", force: true do |t|
