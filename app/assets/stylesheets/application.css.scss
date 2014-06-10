@@ -87,4 +87,18 @@ body {
 .container {
     margin-left: 15px;
     
+    .alert_container {
+	position: fixed;
+	left: 50%;
+	top: 30px;
+	
+	.notice {
+	    -moz-border-radius: 15px;
+	    border-radius: 15px;
+	    background-color: lightblue;
+	    position: relative;
+	    padding: 5px;
+	    left: -50%;
+	}
+    }
 }
