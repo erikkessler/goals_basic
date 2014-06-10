@@ -28,6 +28,12 @@ class Activity < ActiveRecord::Base
   ARCHIVED_HABIT = 4
   EXPIRED = 5
 
+  # constants for feed
+  PRIVATE = 0
+  FOLLOWERS = 1
+  MENTORS = 2
+  BOTH = 3
+
   # adds a child the activity
   def add_child(child)
     if child.is_a? Activity

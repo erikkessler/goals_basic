@@ -33,7 +33,6 @@ module MyModules
         return errors
       end
 
-      
 
       # create the new task
       new_activity = nil
@@ -41,7 +40,8 @@ module MyModules
         new_activity = FullTask.new(name: params[:name], 
                                     show_date: params[:show_date], 
                                     description: params[:description],
-                                    expiration_date: params[:expiration_date])
+                                    expiration_date: params[:expiration_date],
+                                    report_to: params[:report_to])
         if current_user.set_rewards
           new_activity.reward = params[:reward]
           new_activity.penalty = params[:penalty]
@@ -51,7 +51,8 @@ module MyModules
         new_activity = PartialTask.new(name: params[:name], 
                                        show_date: params[:show_date], 
                                        description: params[:description],
-                                       expiration_date: params[:expiration_date])
+                                       expiration_date: params[:expiration_date],
+                                       report_to: params[:report_to])
         if current_user.set_rewards
           new_activity.reward = params[:reward]
           new_activity.penalty = params[:penalty]
@@ -99,7 +100,8 @@ module MyModules
         new_activity = Habit.new(name: params[:name],
                                  description: params[:description],
                                  expiration_date: params[:expiration_date],
-                                 period: period)
+                                 period: period,
+                                 report_to: params[:report_to])
         if current_user.set_rewards
           new_activity.reward = params[:reward]
           new_activity.penalty = params[:penalty]
@@ -111,7 +113,8 @@ module MyModules
                                        description: params[:description],
                                        expiration_date: params[:expiration_date],
                                        period: period,
-                                       count_goal: params[:total])
+                                       count_goal: params[:total],
+                                       report_to: params[:report_to])
 
         if current_user.set_rewards
           new_activity.reward = params[:reward]
@@ -127,7 +130,8 @@ module MyModules
                                         description: params[:description],
                                         expiration_date: params[:expiration_date],
                                         period: period,
-                                        count: params[:per_week])
+                                        count: params[:per_week],
+                                        report_to: params[:report_to])
         if current_user.set_rewards
           new_activity.reward = params[:reward]
           new_activity.penalty = params[:penalty]
@@ -166,6 +170,12 @@ module MyModules
       new_activity.repititions.each {|rep| 
         Permission.create(user_id: current_user.id, activity_id: rep.id, 
                           level: Permission::PRIVATE) }
+
+      # report habit creation
+      if params[:report_to] == Activity::FOLLOWERS or params[:report_to] == Activity::BOTH
+        current_user.feed_items.create(:message => 
+                                       "started the habit #{params[:name]}")
+      end
 
       return errors
     end

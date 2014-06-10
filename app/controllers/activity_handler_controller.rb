@@ -15,7 +15,7 @@ class ActivityHandlerController < ApplicationController
     @activities = handler.get_parentable(current_user)
     @errors = { }
     @values = { :show_date => Date.current, :habit_type => 'none', :period => 2,
-      :type_group => 1} # set some defaults
+      :type_group => 1, :report_to => 0} # set some defaults
     @method = :post
     @path = '/activity_handler'   
   end

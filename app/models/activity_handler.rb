@@ -93,9 +93,17 @@ class ActivityHandler < ActiveRecord::Base
     state = activity.state
     if state == Activity::COMPLETE
       activity.incomplete
+      if activity.report_to == Activity::FOLLOWERS or activity.report_to == Activity::BOTH
+        current_user.feed_items.create(:message => 
+                                       "actually didn't complete #{activity.name}")
+      end
       return "Set #{activity.name} to incomplete..."
     elsif state == Activity::INCOMPLETE or Activity::OVERDUE
       activity.complete
+      if activity.report_to == Activity::FOLLOWERS or activity.report_to == Activity::BOTH
+        current_user.feed_items.create(:message => 
+                                       "completed #{activity.name}")
+      end
       return "Completed #{activity.name}!"
     end
   end
@@ -232,6 +240,11 @@ class ActivityHandler < ActiveRecord::Base
   def remove_act(id, current_user)
     activity = get_activities(current_user).find(id)
     activity.remove_act
+    if acitvity.is_a? (Habit) and (activity.report_to == Activity::FOLLOWERS or 
+                                   activity.report_to == Activity::BOTH)
+      current_user.feed_items.create(:message => 
+                                     "gave up on the habit #{activity.name}")
+    end
     return "Removed #{activity.name}!"
   end
 

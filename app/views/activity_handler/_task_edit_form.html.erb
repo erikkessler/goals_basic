@@ -16,6 +16,10 @@
       options_from_collection_for_select(@activities,"id", "name",
 					 @values[:parent_id].to_i),
       include_blank: true %></br></br>
+    <%= label_tag 'report_to', "Report progress to" %></br>
+  <%= select_tag 'report_to', options_for_select({ "Private" => "0", "Followers" => "1", 
+						   "Mentors" => "2", "Both" => "3"}, 
+						 @values[:report_to]) %></br></br>
   <%= hidden_field_tag 'type_group', 1 %>
   <%= submit_tag "Save Task" %>
   <%= link_to "Cancel", today_path %>

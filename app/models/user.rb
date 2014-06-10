@@ -11,6 +11,7 @@ class User < ActiveRecord::Base
   has_many :permissions
   has_many :friends, :through => :friendships
   has_many :friendships
+  has_many :feed_items
 
   validates :password, presence: true, length: { minimum: 6 }, confirmation: true
   VALID_EMAIL_REGEX = /\A[\w+\-.]+@[a-z\d\-.]+\.[a-z]+\z/i
