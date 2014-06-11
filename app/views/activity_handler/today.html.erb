@@ -11,21 +11,21 @@
   <h1>Today's Activities</h1> 
 </div>
 
-<% if !@overdue.empty? %>
+
   <h3>Overdue:</h3>
-  <ul>
+  <ul class="overdue_tasks">
   <% @overdue.each do |act| %>
-    <li><%= link_to act.name, controller: "activity_handler", action: "show", id: act.id %> | <%= link_to "Complete",  controller: "activity_handler", action: "toggle", id: act.id %> | <%= link_to "Remove", activity_handler_path(act.id), method: :delete %> | <%= link_to "Edit", edit_activity_handler_path(act.id) %></li>
+    <%= render partial: 'today_task', object: act, as: 'act' %>
   <% end %>
   </ul>
-<% end %>
+
 
   <div id="today">
   <h3>Scheduled for Today:</h3>
   <ul>
     <span class="today_tasks">
       <% @incomplete.each do |act| %>
-	<li><%= link_to act.name, controller: "activity_handler", action: "show", id: act.id %> | <%= link_to "Complete",  controller: "activity_handler", action: "toggle", id: act.id %> | <%= link_to "Remove", activity_handler_path(act.id), method: :delete %> | <%= link_to "Edit", edit_activity_handler_path(act.id) %></li>
+	<%= render partial: 'today_task', object: act, as: 'act' %>
       <% end %>
     </span>
   <li>
@@ -43,11 +43,9 @@
   </ul>
   </div>
 
-<% if !@complete.empty? %>
   <h3>Complete:</h3>
-  <ul>
+  <ul class="complete_tasks">
   <% @complete.each do |act| %>
-    <li><%= link_to act.name, controller: "activity_handler", action: "show", id: act.id %> | <%= link_to "Incomplete",  controller: "activity_handler", action: "toggle", id: act.id %> | <%= link_to "Remove", activity_handler_path(act.id), method: :delete %> | <%= link_to "Edit", edit_activity_handler_path(act.id) %></li>
+    <%= render partial: 'today_task', object: act, as: 'act' %>
   <% end %>
   </ul>
-<% end %>

@@ -1,0 +1,11 @@
+<% 
+   act = Activity.find(params[:id])
+   add_to = "today"
+   if act.state == Activity::COMPLETE
+     add_to = "complete"
+   elsif act.state == Activity::OVERDUE 
+     add_to = "overdue"
+   end %>
+
+$("#task_<%= act.id %>").remove()
+$("<%= escape_javascript( render partial: 'today_task', object: Activity.find(params[:id]), as: 'act') %>").appendTo(".<%= add_to %>_tasks")

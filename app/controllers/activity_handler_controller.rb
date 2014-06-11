@@ -73,8 +73,14 @@ class ActivityHandlerController < ApplicationController
   # For changing the state of an activity
   def toggle
     handler = current_user.activity_handler
-    flash[:notice] = handler.toggle(params[:id], current_user)
-    redirect_to :action => "today"
+    @notice = handler.toggle(params[:id], current_user)
+    
+    respond_to do |format|
+      format.html {
+        redirect_to :action => "today", :notice => @notice
+      }
+      format.js {}
+    end
   end
 
   # For removing activities

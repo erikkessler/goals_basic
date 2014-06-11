@@ -7,7 +7,7 @@ namespace :advance do
                                Activity::OVERDUE)
     yesterday.each do |act|
       if act.expiration_date.nil?
-        act.show_date = Date.today
+        act.show_date = Date.current
         act.state = Activity::OVERDUE
         
       elsif act.expiration_date >= Date.current

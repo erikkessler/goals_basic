@@ -1,1 +1,1 @@
-<li><%= link_to act.name, controller: "activity_handler", action: "show", id: act.id %> | <%= link_to act.state == Activity::INCOMPLETE ? "Complete" : "Incomplete",  controller: "activity_handler", action: "toggle", id: act.id %> | <%= link_to "Remove", activity_handler_path(act.id), method: :delete %> | <%= link_to "Edit", edit_activity_handler_path(act.id) %></li>
+<li id="task_<%= act.id %>"><%= check_box_tag "tasks[#{act.id}]", act.id, act.state == 1, class: 'task_checkbox'  %> <%= label_tag "tasks[#{act.id}]", act.name %></li>

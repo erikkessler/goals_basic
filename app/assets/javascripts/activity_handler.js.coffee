@@ -18,3 +18,7 @@ $(document).on "ready page:load", ->
                 $("#task").css("font-weight","Normal")
                 $("#habit_form").show()
                 $("#habit").css("font-weight","Bold")
+        $(".task_checkbox").change ->
+                $.ajax
+                   url: "/toggle/" + $(this).attr('value') + ".js"
+       
