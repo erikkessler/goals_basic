@@ -1,6 +1,11 @@
 # Place all the behaviors and hooks related to the matching controller here.
 # All this logic will automatically be available in application.js.
 # You can use CoffeeScript in this file: http://coffeescript.org/
+
+checkboxChange= ->
+        $.ajax
+                url: "/toggle/" + $(this).attr('value') + ".js"
+                
 $(document).on "ready page:load", ->
         $(".shown_form").show()
         $(".shown_form_title").css("font-weight","Bold")
@@ -18,7 +23,8 @@ $(document).on "ready page:load", ->
                 $("#task").css("font-weight","Normal")
                 $("#habit_form").show()
                 $("#habit").css("font-weight","Bold")
-        $(".task_checkbox").change ->
-                $.ajax
-                   url: "/toggle/" + $(this).attr('value') + ".js"
+
+$ ->
+        $(document).on 'change', '.task_checkbox', checkboxChange
+                
        
