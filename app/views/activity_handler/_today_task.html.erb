@@ -1,1 +1,1 @@
-<li id="task_<%= act.id %>"><%= check_box_tag "tasks[#{act.id}]", act.id, act.state == 1, class: 'task_checkbox'  %> <%= label_tag "tasks[#{act.id}]", act.name %></li>
+<li class="task_item" id="task_<%= act.id %>"><%= check_box_tag "tasks[#{act.id}]", act.id, act.state == 1, class: 'task_checkbox'  %> <%= label_tag "tasks[#{act.id}]", act.name %> <span class="show-menu-marker" id="marker-<%= act.id %>">+</span></li>

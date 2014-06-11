@@ -1,3 +1,22 @@
 // Place all the styles related to the ActivityHandler controller here.
 // They will automatically be included in application.css.
 // You can use Sass (SCSS) here: http://sass-lang.com/
+.today-menu-container {
+    position: absolute;
+    background-color: lightgray;
+
+    ul {
+	padding: 0;
+	margin: 7px 0;
+	li {
+	    list-style-type: none;
+	    padding: 2px 7px;
+	    
+	}
+	
+	li:hover {
+	    background-color: gray;
+	    cursor: pointer;
+	}
+    }
+}
