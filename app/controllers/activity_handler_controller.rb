@@ -86,8 +86,15 @@ class ActivityHandlerController < ApplicationController
   # For removing activities
   def destroy
     handler = current_user.activity_handler
-    flash[:notice] = handler.remove_act(params[:id], current_user)
-    redirect_to :action => "today"
+    @notice = handler.remove_act(params[:id], current_user)
+
+    respond_to do |format|
+      format.html {
+        flash[:notice] = @notice
+        redirect_to :action => "today"
+      }
+      format.js {}
+    end
   end
 
   # For editing activities

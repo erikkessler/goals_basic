@@ -60,7 +60,7 @@ $ ->
                 window.location = '/activity_handler/' + $(".today-menu-container").attr("index") + '/edit'
         $(document).on 'click', '#today-menuitem-remove', ->
                 $.ajax
-                        url: '/activity_handler/' + $(".today-menu-container").attr("index")
+                        url: '/activity_handler/' + $(".today-menu-container").attr("index") + '.js'
                         type: 'DELETE'
                 
        
