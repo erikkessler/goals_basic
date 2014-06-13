@@ -11,7 +11,7 @@
   <h1>Today's Activities</h1> 
 </div>
 
-
+<div class="today-tasks">
   <h3>Overdue:</h3>
   <ul class="overdue_tasks">
   <% @overdue.each do |act| %>
@@ -49,6 +49,7 @@
     <%= render partial: 'today_task', object: act, as: 'act' %>
   <% end %>
   </ul>
+</div>
 
 
   <div class="today-menu-container">

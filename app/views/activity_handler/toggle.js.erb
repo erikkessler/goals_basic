@@ -7,5 +7,9 @@
      add_to = "overdue"
    end %>
 
-$("#task_<%= act.id %>").remove()
-$("<%= escape_javascript( render partial: 'today_task', object: Activity.find(params[:id]), as: 'act') %>").appendTo(".<%= add_to %>_tasks")
+$("#task_<%= act.id %>").remove();
+$("<%= escape_javascript( render partial: 'today_task', object: Activity.find(params[:id]), as: 'act') %>").appendTo(".<%= add_to %>_tasks");
+
+<% if !@notice.nil? %>
+$(".alert_container").html("<div class=\"notice\"><%= @notice %></div>").show().delay(1800).fadeOut()
+<% end %>
